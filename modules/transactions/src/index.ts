@@ -1,4 +1,3 @@
-// @opencomp/transactions public interface
-// Replace this stub with real exports as the module is implemented.
-export {}
-
+export { TransactionsService, TransactionError, IngestTransactionSchema, BulkIngestSchema } from './transactions.service'
+export type { IngestTransactionInput } from './transactions.service'
+export { transactionRoutes } from './transactions.routes'

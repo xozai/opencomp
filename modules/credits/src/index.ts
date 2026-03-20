@@ -1,4 +1,2 @@
-// @opencomp/credits public interface
-// Replace this stub with real exports as the module is implemented.
-export {}
-
+export { CreditsService, CreditError, ApplyCreditSchema } from './credits.service'
+export type { ApplyCreditInput, CreditResult } from './credits.service'
