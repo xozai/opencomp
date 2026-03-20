@@ -1,0 +1,23 @@
+{
+  "name": "@opencomp/testing",
+  "version": "0.1.0",
+  "description": "OpenComp shared test utilities — factories, fixtures, DB test helpers",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs --dts",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .ts"
+  },
+  "dependencies": {
+    "@opencomp/contracts": "workspace:*",
+    "drizzle-orm": "^0.30.0",
+    "pg": "^8.11.5"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.11.5",
+    "tsup": "^8.0.2",
+    "typescript": "^5.4.0",
+    "vitest": "^1.4.0"
+  }
+}

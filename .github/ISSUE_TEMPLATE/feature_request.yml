@@ -1,0 +1,63 @@
+name: Feature Request
+description: Suggest a new feature or enhancement
+labels:
+  - enhancement
+  - needs-triage
+
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem statement
+      description: What problem does this solve?
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: A clear and concise description of the solution you would like.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: A description of any alternative solutions or features you have considered.
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Add any other context, screenshots, examples, or references here.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Plan Design
+        - Calculations
+        - Disputes
+        - Approvals
+        - Integrations
+        - Plugin System
+        - Admin Portal
+        - Rep Portal
+        - API
+        - Documentation
+        - Other
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Checklist
+      options:
+        - label: I have searched for existing issues/RFCs
+          required: true
+        - label: I am willing to help implement this
+          required: false

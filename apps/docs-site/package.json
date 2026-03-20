@@ -1,0 +1,21 @@
+{
+  "name": "@opencomp/docs-site",
+  "version": "0.1.0",
+  "private": true,
+  "description": "OpenComp documentation site (Astro + Starlight)",
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "typecheck": "astro check && tsc --noEmit"
+  },
+  "dependencies": {
+    "@astrojs/starlight": "^0.22.0",
+    "astro": "^4.6.3",
+    "sharp": "^0.33.3"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0"
+  }
+}

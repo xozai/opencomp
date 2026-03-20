@@ -1,0 +1,17 @@
+{
+  "$schema": "https://unpkg.com/@changesets/config@3.0.0/schema.json",
+  "changelog": "@changesets/cli/changelog",
+  "commit": false,
+  "fixed": [],
+  "linked": [],
+  "access": "restricted",
+  "baseBranch": "main",
+  "updateInternalDependencies": "patch",
+  "ignore": [
+    "@opencomp/api",
+    "@opencomp/admin-portal",
+    "@opencomp/rep-portal",
+    "@opencomp/worker",
+    "@opencomp/docs-site"
+  ]
+}

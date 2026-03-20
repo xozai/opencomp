@@ -1,0 +1,24 @@
+{
+  "name": "@opencomp/platform-notifications",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Notification dispatch — email, in-app, and webhook notifications triggered by domain events",
+  "main": "./src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .ts",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@opencomp/contracts": "workspace:*",
+    "@opencomp/platform-events": "workspace:*",
+    "bullmq": "^5.7.0",
+    "nodemailer": "^6.9.13",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/nodemailer": "^6.4.14",
+    "typescript": "^5.4.0",
+    "vitest": "^1.4.0"
+  }
+}

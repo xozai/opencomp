@@ -1,0 +1,26 @@
+{
+  "name": "@opencomp/calculations",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Calculations module — run compensation calculations from credits + plan rules to produce payouts",
+  "main": "./src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .ts",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@opencomp/contracts": "workspace:*",
+    "@opencomp/credits": "workspace:*",
+    "@opencomp/plans": "workspace:*",
+    "@opencomp/platform-audit": "workspace:*",
+    "@opencomp/platform-rules": "workspace:*",
+    "@opencomp/quotas": "workspace:*",
+    "drizzle-orm": "^0.30.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "vitest": "^1.4.0"
+  }
+}

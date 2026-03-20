@@ -1,0 +1,55 @@
+# Global owners — review all PRs
+* @opencomp/core-team
+
+# Apps
+/apps/api/ @opencomp/core-team
+/apps/admin-portal/ @opencomp/core-team
+/apps/rep-portal/ @opencomp/core-team
+/apps/worker/ @opencomp/core-team
+/apps/docs-site/ @opencomp/core-team
+
+# Platform modules
+/modules/platform-auth/ @opencomp/core-team
+/modules/platform-tenancy/ @opencomp/core-team
+/modules/platform-audit/ @opencomp/core-team
+/modules/platform-workflow/ @opencomp/core-team
+/modules/platform-rules/ @opencomp/core-team
+/modules/platform-events/ @opencomp/core-team
+/modules/platform-notifications/ @opencomp/core-team
+/modules/platform-files/ @opencomp/core-team
+/modules/platform-reporting/ @opencomp/core-team
+
+# Business modules
+/modules/plans/ @opencomp/core-team
+/modules/quotas/ @opencomp/core-team
+/modules/goalsheets/ @opencomp/core-team
+/modules/transactions/ @opencomp/core-team
+/modules/credits/ @opencomp/core-team
+/modules/calculations/ @opencomp/core-team
+/modules/payouts/ @opencomp/core-team
+/modules/statements/ @opencomp/core-team
+/modules/disputes/ @opencomp/core-team
+/modules/approvals/ @opencomp/core-team
+/modules/adjustments/ @opencomp/core-team
+/modules/integrations/ @opencomp/core-team
+/modules/participants/ @opencomp/core-team
+/modules/org-hierarchy/ @opencomp/core-team
+
+# Shared packages
+/packages/ @opencomp/core-team
+
+# Plugin SDK — especially strict review
+/packages/sdk/ @opencomp/core-team
+
+# Sample plugins
+/plugins/ @opencomp/core-team
+
+# Governance docs
+/GOVERNANCE.md @opencomp/core-team
+/RFC_PROCESS.md @opencomp/core-team
+/RELEASE_POLICY.md @opencomp/core-team
+/SECURITY.md @opencomp/core-team
+
+# CI/CD
+/.github/ @opencomp/core-team
+/infrastructure/ @opencomp/core-team

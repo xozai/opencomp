@@ -1,0 +1,20 @@
+{
+  "name": "@opencomp/platform-events",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Internal event bus — in-process pub/sub for domain events between modules",
+  "main": "./src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .ts",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@opencomp/contracts": "workspace:*",
+    "@opencomp/events": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "vitest": "^1.4.0"
+  }
+}
