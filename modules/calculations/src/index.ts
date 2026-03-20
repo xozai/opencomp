@@ -1,4 +1,3 @@
-// @opencomp/calculations public interface
-// Replace this stub with real exports as the module is implemented.
-export {}
-
+export { CalculationsService, CalculationError } from './calculations.service'
+export type { StartCalculationRunInput, PayoutLineItem } from './calculations.service'
+export { calculationRoutes } from './calculations.routes'

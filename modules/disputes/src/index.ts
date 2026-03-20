@@ -1,4 +1,3 @@
-// @opencomp/disputes public interface
-// Replace this stub with real exports as the module is implemented.
-export {}
-
+export { DisputesService, DisputeError, OpenDisputeSchema, ResolveDisputeSchema } from './disputes.service'
+export type { OpenDisputeInput, ResolveDisputeInput } from './disputes.service'
+export { disputeRoutes } from './disputes.routes'

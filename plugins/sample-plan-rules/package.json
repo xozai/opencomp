@@ -1,0 +1,26 @@
+{
+  "name": "@opencomp/sample-plan-rules",
+  "version": "0.1.0",
+  "description": "Sample OpenComp plugin: accelerated commission and MBO bonus formulas",
+  "main": "./src/index.ts",
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .ts"
+  },
+  "dependencies": {
+    "@opencomp/contracts": "workspace:*",
+    "@opencomp/sdk": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "vitest": "^1.4.0"
+  },
+  "keywords": ["opencomp", "opencomp-plugin", "sales-compensation"],
+  "opencomp": {
+    "pluginManifest": {
+      "compatibleWith": "^0.1.0",
+      "extends": ["plan-formula"]
+    }
+  }
+}

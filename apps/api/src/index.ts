@@ -11,6 +11,9 @@ import { authRoutes } from '../../modules/platform-auth/src/auth.routes'
 import type { JwtPayload } from '../../modules/platform-auth/src/auth.service'
 import { planRoutes } from '../../modules/plans/src/plans.routes'
 import { goalSheetRoutes } from '../../modules/goalsheets/src/goalsheets.routes'
+import { transactionRoutes } from '../../modules/transactions/src/transactions.routes'
+import { calculationRoutes } from '../../modules/calculations/src/calculations.routes'
+import { disputeRoutes } from '../../modules/disputes/src/disputes.routes'
 
 // ─── Fastify augmentations ────────────────────────────────────────────────────
 
@@ -91,6 +94,9 @@ export async function buildApp() {
   await app.register(authRoutes, { prefix: '/api/v1' })
   await app.register(planRoutes, { prefix: '/api/v1' })
   await app.register(goalSheetRoutes, { prefix: '/api/v1' })
+  await app.register(transactionRoutes, { prefix: '/api/v1' })
+  await app.register(calculationRoutes, { prefix: '/api/v1' })
+  await app.register(disputeRoutes, { prefix: '/api/v1' })
 
   return app
 }
