@@ -1,4 +1,3 @@
-// @opencomp/platform-files public interface
-// Replace this stub with real exports as the module is implemented.
-export {}
+export { FilesService, LocalFileDriver, S3FileDriver, createFilesService } from './files.service'
+export type { StoredFile, FileDriver } from './files.service'
 

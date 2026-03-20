@@ -1,4 +1,3 @@
-// @opencomp/org-hierarchy public interface
-// Replace this stub with real exports as the module is implemented.
-export {}
+export { OrgHierarchyService, OrgHierarchyError } from './org-hierarchy.service'
+export type { OrgNode } from './org-hierarchy.service'
 

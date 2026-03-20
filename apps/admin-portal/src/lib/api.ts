@@ -185,3 +185,15 @@ export const approvalsApi = {
       method: 'POST', body: JSON.stringify(body),
     }),
 }
+
+// ─── Adjustments ──────────────────────────────────────────────────────────────
+
+export const adjustmentsApi = {
+  list: (params?: Record<string, string>) => {
+    const qs = params ? '?' + new URLSearchParams(params).toString() : ''
+    return apiFetch<{ success: true; data: unknown[] }>(`/adjustments${qs}`)
+  },
+  get: (id: string) => apiFetch<{ success: true; data: unknown }>(`/adjustments/${id}`),
+  create: (body: unknown) =>
+    apiFetch<{ success: true; data: unknown }>('/adjustments', { method: 'POST', body: JSON.stringify(body) }),
+}

@@ -1,4 +1,3 @@
-// @opencomp/platform-workflow public interface
-// Replace this stub with real exports as the module is implemented.
-export {}
+export { workflowEngine, WorkflowError } from './workflow.service'
+export type { MachineDefinition, Transition } from './workflow.service'
 

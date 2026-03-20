@@ -1,4 +1,10 @@
-// @opencomp/integrations public interface
-// Replace this stub with real exports as the module is implemented.
-export {}
+export {
+  IntegrationsService,
+  IntegrationError,
+  IntegrationConfigSchema,
+  integrationsService,
+  registerTransactionAdapter,
+  registerHrisAdapter,
+} from './integrations.service'
+export type { IntegrationConfig, SyncResult, HrisAdapterExtension, EmployeeRecord } from './integrations.service'
 

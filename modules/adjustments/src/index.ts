@@ -1,4 +1,4 @@
-// @opencomp/adjustments public interface
-// Replace this stub with real exports as the module is implemented.
-export {}
+export { AdjustmentsService, AdjustmentError, CreateAdjustmentSchema } from './adjustments.service'
+export { adjustmentRoutes } from './adjustments.routes'
+export type { AdjustmentRecord, CreateAdjustmentInput } from './adjustments.service'
 
