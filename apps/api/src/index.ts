@@ -14,6 +14,11 @@ import { goalSheetRoutes } from '../../modules/goalsheets/src/goalsheets.routes'
 import { transactionRoutes } from '../../modules/transactions/src/transactions.routes'
 import { calculationRoutes } from '../../modules/calculations/src/calculations.routes'
 import { disputeRoutes } from '../../modules/disputes/src/disputes.routes'
+import { participantRoutes } from '../../modules/participants/src/participants.routes'
+import { statementRoutes } from '../../modules/statements/src/statements.routes'
+import { approvalRoutes } from '../../modules/approvals/src/approvals.routes'
+import { NotificationsService } from '../../modules/platform-notifications/src/notifications.service'
+import { registerNotificationListeners } from '../../modules/platform-notifications/src/notifications.listeners'
 
 // ─── Fastify augmentations ────────────────────────────────────────────────────
 
@@ -97,6 +102,13 @@ export async function buildApp() {
   await app.register(transactionRoutes, { prefix: '/api/v1' })
   await app.register(calculationRoutes, { prefix: '/api/v1' })
   await app.register(disputeRoutes, { prefix: '/api/v1' })
+  await app.register(participantRoutes, { prefix: '/api/v1' })
+  await app.register(statementRoutes, { prefix: '/api/v1' })
+  await app.register(approvalRoutes, { prefix: '/api/v1' })
+
+  // ── Notification listeners ──
+  const notificationsSvc = new NotificationsService(app.db)
+  registerNotificationListeners(notificationsSvc, async () => null) // participant→user resolver stub
 
   return app
 }

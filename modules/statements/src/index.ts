@@ -1,4 +1,3 @@
-// @opencomp/statements public interface
-// Replace this stub with real exports as the module is implemented.
-export {}
-
+export { StatementsService, StatementError, GenerateStatementsSchema } from './statements.service'
+export type { StatementSummary, GenerateStatementsInput } from './statements.service'
+export { statementRoutes } from './statements.routes'

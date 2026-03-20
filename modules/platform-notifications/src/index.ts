@@ -1,4 +1,3 @@
-// @opencomp/platform-notifications public interface
-// Replace this stub with real exports as the module is implemented.
-export {}
-
+export { NotificationsService } from './notifications.service'
+export type { SendNotificationInput } from './notifications.service'
+export { registerNotificationListeners } from './notifications.listeners'
