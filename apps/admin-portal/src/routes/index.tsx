@@ -1,8 +1,11 @@
-import { createFileRoute, redirect } from '@tanstack/react-router'
+import { createRoute, redirect } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { getAccessToken, calculationsApi, disputesApi, approvalsApi } from '../lib/api'
+import { Route as rootRoute } from './__root'
 
-export const Route = createFileRoute('/')({
+export const Route = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/',
   beforeLoad: () => {
     if (!getAccessToken()) throw redirect({ to: '/login' })
   },
