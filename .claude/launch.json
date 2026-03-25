@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "admin-portal",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@opencomp/admin-portal", "dev"],
+      "port": 3001
+    }
+  ]
+}

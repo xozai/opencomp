@@ -1,6 +1,10 @@
 import 'dotenv/config'
-import { Worker, Queue } from 'bullmq'
+import { Worker } from 'bullmq'
 import IORedis from 'ioredis'
+import { getDb } from '../../api/src/db/client'
+import { CalculationsService } from '../../../modules/calculations/src/calculations.service'
+import { NotificationsService } from '../../../modules/platform-notifications/src/notifications.service'
+import { GoalSheetsService } from '../../../modules/goalsheets/src/goalsheets.service'
 
 const connection = new IORedis(process.env.REDIS_URL ?? 'redis://localhost:6379', {
   maxRetriesPerRequest: null,
@@ -20,6 +24,27 @@ export const QUEUES = {
 } as const
 
 export type QueueName = (typeof QUEUES)[keyof typeof QUEUES]
+
+// ─── Lazy service accessors (instantiated once per process) ───────────────────
+
+let _calcSvc: CalculationsService | undefined
+let _notifSvc: NotificationsService | undefined
+let _goalSvc: GoalSheetsService | undefined
+
+function getCalcSvc() {
+  if (!_calcSvc) _calcSvc = new CalculationsService(getDb())
+  return _calcSvc
+}
+
+function getNotifSvc() {
+  if (!_notifSvc) _notifSvc = new NotificationsService(getDb())
+  return _notifSvc
+}
+
+function getGoalSvc() {
+  if (!_goalSvc) _goalSvc = new GoalSheetsService(getDb())
+  return _goalSvc
+}
 
 // ─── Job handlers ─────────────────────────────────────────────────────────────
 
@@ -41,19 +66,92 @@ async function processJob(queueName: string, jobName: string, data: unknown) {
   }
 }
 
+/**
+ * calculation:run — executes a full calculation run in the background.
+ * Job data: { tenantId, periodId, planVersionId, participantIds?, actorId? }
+ */
 async function handleCalculationJob(jobName: string, data: unknown) {
-  // TODO: import and call calculations module
-  console.log(`[calculations] Job: ${jobName}`, data)
+  const d = data as Record<string, unknown>
+
+  if (jobName === 'calculation:run') {
+    const { tenantId, periodId, planVersionId, participantIds, actorId } = d as {
+      tenantId: string
+      periodId: string
+      planVersionId: string
+      participantIds?: string[]
+      actorId?: string
+    }
+
+    const result = await getCalcSvc().executeRun(
+      tenantId,
+      { periodId, planVersionId, participantIds },
+      { actorId: actorId ?? 'worker', tenantId },
+    )
+
+    console.log(
+      `[calculations] Run ${result.id} complete: ${result.participantCount} participants, ${result.errorCount} errors`,
+    )
+    return result
+  }
+
+  console.warn(`[calculations] Unknown job: ${jobName}`)
 }
 
+/**
+ * notification:send — sends a single notification.
+ * Job data: { tenantId, recipientId, type, title, body, metadata? }
+ */
 async function handleNotificationJob(jobName: string, data: unknown) {
-  // TODO: import and call notifications module
-  console.log(`[notifications] Job: ${jobName}`, data)
+  const d = data as Record<string, unknown>
+
+  if (jobName === 'notification:send') {
+    const { tenantId, recipientId, type, title, body, metadata } = d as {
+      tenantId: string
+      recipientId: string
+      type: string
+      title: string
+      body: string
+      metadata?: Record<string, unknown>
+    }
+
+    await getNotifSvc().send({ tenantId, recipientId, type, title, body, metadata })
+    console.log(`[notifications] Sent '${type}' to ${recipientId}`)
+    return
+  }
+
+  console.warn(`[notifications] Unknown job: ${jobName}`)
 }
 
+/**
+ * goalsheet:generate  — creates draft goal sheets for a plan version + period.
+ * goalsheet:distribute — transitions drafts to distributed state.
+ * Job data: { tenantId, planVersionId, periodId, participantIds?, goalSheetIds?, actorId? }
+ */
 async function handleGoalSheetJob(jobName: string, data: unknown) {
-  // TODO: import and call goalsheets module
-  console.log(`[goalsheets] Job: ${jobName}`, data)
+  const d = data as Record<string, unknown>
+  const ctx = { actorId: (d.actorId as string) ?? 'worker', tenantId: d.tenantId as string }
+
+  if (jobName === 'goalsheet:generate') {
+    const { tenantId, planVersionId, periodId, participantIds } = d as {
+      tenantId: string
+      planVersionId: string
+      periodId: string
+      participantIds?: string[]
+    }
+
+    const result = await getGoalSvc().generate(tenantId, { planVersionId, periodId, participantIds }, ctx)
+    console.log(`[goalsheets] Generated ${result.generated}, skipped ${result.skipped}`)
+    return result
+  }
+
+  if (jobName === 'goalsheet:distribute') {
+    const { tenantId, goalSheetIds } = d as { tenantId: string; goalSheetIds: string[] }
+    const result = await getGoalSvc().distribute(tenantId, goalSheetIds, ctx)
+    console.log(`[goalsheets] Distributed ${result.length} goal sheets`)
+    return result
+  }
+
+  console.warn(`[goalsheets] Unknown job: ${jobName}`)
 }
 
 // ─── Start workers ────────────────────────────────────────────────────────────

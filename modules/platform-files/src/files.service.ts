@@ -58,7 +58,7 @@ export class LocalFileDriver implements FileDriver {
   }
 }
 
-// ─── S3 driver (thin wrapper — real impl requires @aws-sdk/client-s3) ─────────
+// ─── S3 driver (uses @aws-sdk/client-s3 when available) ──────────────────────
 
 export class S3FileDriver implements FileDriver {
   constructor(
@@ -67,20 +67,60 @@ export class S3FileDriver implements FileDriver {
     private endpoint?: string,
   ) {}
 
-  async put(_key: string, _stream: Readable): Promise<void> {
-    throw new Error('S3FileDriver: @aws-sdk/client-s3 must be installed and configured')
+  private async getClient() {
+    try {
+      // Dynamic import so the module is optional — only required when FILES_DRIVER=s3
+      const { S3Client } = await import('@aws-sdk/client-s3')
+      return new S3Client({
+        region: this.region,
+        ...(this.endpoint ? { endpoint: this.endpoint, forcePathStyle: true } : {}),
+      })
+    } catch {
+      throw new Error(
+        'S3FileDriver: @aws-sdk/client-s3 is not installed. Run: pnpm add @aws-sdk/client-s3',
+      )
+    }
   }
 
-  async get(_key: string): Promise<Readable> {
-    throw new Error('S3FileDriver: not implemented')
+  async put(key: string, stream: Readable, meta: { mimeType: string }): Promise<void> {
+    const { PutObjectCommand } = await import('@aws-sdk/client-s3')
+    const client = await this.getClient()
+    await client.send(
+      new PutObjectCommand({
+        Bucket: this.bucket,
+        Key: key,
+        Body: stream,
+        ContentType: meta.mimeType,
+      }),
+    )
   }
 
-  async delete(_key: string): Promise<void> {
-    throw new Error('S3FileDriver: not implemented')
+  async get(key: string): Promise<Readable> {
+    const { GetObjectCommand } = await import('@aws-sdk/client-s3')
+    const client = await this.getClient()
+    const response = await client.send(new GetObjectCommand({ Bucket: this.bucket, Key: key }))
+    if (!response.Body) throw new Error(`S3FileDriver: empty body for key "${key}"`)
+    // AWS SDK v3 returns a SdkStream which is Readable-compatible
+    return response.Body as unknown as Readable
   }
 
-  async exists(_key: string): Promise<boolean> {
-    throw new Error('S3FileDriver: not implemented')
+  async delete(key: string): Promise<void> {
+    const { DeleteObjectCommand } = await import('@aws-sdk/client-s3')
+    const client = await this.getClient()
+    await client.send(new DeleteObjectCommand({ Bucket: this.bucket, Key: key }))
+  }
+
+  async exists(key: string): Promise<boolean> {
+    const { HeadObjectCommand } = await import('@aws-sdk/client-s3')
+    const client = await this.getClient()
+    try {
+      await client.send(new HeadObjectCommand({ Bucket: this.bucket, Key: key }))
+      return true
+    } catch (err: unknown) {
+      const code = (err as { name?: string })?.name
+      if (code === 'NotFound' || code === 'NoSuchKey') return false
+      throw err
+    }
   }
 
   url(key: string): string {

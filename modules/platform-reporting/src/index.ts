@@ -1,4 +1,3 @@
-// @opencomp/platform-reporting public interface
-// Replace this stub with real exports as the module is implemented.
-export {}
-
+export { ReportingService } from './reporting.service'
+export type { PayoutSummaryRow, RunSummaryRow, AttainmentRow } from './reporting.service'
+export { reportingRoutes } from './reporting.routes'

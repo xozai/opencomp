@@ -1,4 +1,3 @@
-// @opencomp/payouts public interface
-// Replace this stub with real exports as the module is implemented.
-export {}
-
+export { PayoutsService, PayoutError } from './payouts.service'
+export type { PayoutStatus, UpdatePayoutStatusInput } from './payouts.service'
+export { payoutsRoutes } from './payouts.routes'
