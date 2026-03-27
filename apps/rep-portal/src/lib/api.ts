@@ -84,6 +84,8 @@ export const goalSheetsApi = {
     const qs = params ? '?' + new URLSearchParams(params).toString() : ''
     return apiFetch<{ success: true; data: unknown[] }>(`/goal-sheets${qs}`)
   },
+  acknowledge: (id: string) =>
+    apiFetch<{ success: true; data: unknown }>(`/goal-sheets/${id}/acknowledge`, { method: 'POST' }),
 }
 
 export const statementsApi = {

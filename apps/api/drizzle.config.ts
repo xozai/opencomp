@@ -3,8 +3,8 @@ import type { Config } from 'drizzle-kit'
 export default {
   schema: './src/db/schema.ts',
   out: './migrations',
-  driver: 'pg',
+  dialect: 'postgresql',
   dbCredentials: {
-    connectionString: process.env.DATABASE_URL ?? 'postgresql://opencomp:opencomp@localhost:5432/opencomp_dev',
+    url: process.env.DATABASE_URL ?? 'postgresql://opencomp:opencomp@localhost:5432/opencomp_dev',
   },
 } satisfies Config

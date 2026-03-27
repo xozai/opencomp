@@ -197,3 +197,34 @@ export const adjustmentsApi = {
   create: (body: unknown) =>
     apiFetch<{ success: true; data: unknown }>('/adjustments', { method: 'POST', body: JSON.stringify(body) }),
 }
+
+// ─── Payouts ──────────────────────────────────────────────────────────────────
+
+export const payoutsApi = {
+  list: (params: { calculationRunId?: string; participantId?: string; periodId?: string }) => {
+    const qs = '?' + new URLSearchParams(params as Record<string, string>).toString()
+    return apiFetch<{ success: true; data: unknown[] }>(`/payouts${qs}`)
+  },
+  get: (id: string) => apiFetch<{ success: true; data: unknown }>(`/payouts/${id}`),
+  approveRun: (runId: string) =>
+    apiFetch<{ success: true; data: { approved: number; skipped: number } }>(
+      `/payouts/runs/${runId}/approve`, { method: 'POST' },
+    ),
+  markPaid: (payoutIds: string[]) =>
+    apiFetch<{ success: true; data: { paid: number } }>(
+      '/payouts/mark-paid', { method: 'POST', body: JSON.stringify({ payoutIds }) },
+    ),
+}
+
+// ─── Reporting ────────────────────────────────────────────────────────────────
+
+export const reportingApi = {
+  payoutSummary: (periodId: string) =>
+    apiFetch<{ success: true; data: unknown[] }>(`/reports/payouts?periodId=${periodId}`),
+  runSummary: (periodId?: string) => {
+    const qs = periodId ? `?periodId=${periodId}` : ''
+    return apiFetch<{ success: true; data: unknown[] }>(`/reports/runs${qs}`)
+  },
+  attainmentBreakdown: (runId: string) =>
+    apiFetch<{ success: true; data: unknown[] }>(`/reports/attainment/${runId}`),
+}

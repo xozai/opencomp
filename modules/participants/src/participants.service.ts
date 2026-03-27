@@ -200,6 +200,15 @@ export class ParticipantsService {
     return updated
   }
 
+  async getUserIdForParticipant(participantId: string): Promise<string | null> {
+    const [p] = await this.db
+      .select({ userId: participants.userId })
+      .from(participants)
+      .where(eq(participants.id, participantId))
+      .limit(1)
+    return p?.userId ?? null
+  }
+
   async softDelete(tenantId: string, participantId: string, ctx: AuditContext) {
     await this.get(tenantId, participantId)
 

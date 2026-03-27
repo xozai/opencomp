@@ -18,8 +18,11 @@ import { participantRoutes } from '../../modules/participants/src/participants.r
 import { statementRoutes } from '../../modules/statements/src/statements.routes'
 import { approvalRoutes } from '../../modules/approvals/src/approvals.routes'
 import { adjustmentRoutes } from '../../modules/adjustments/src/adjustments.routes'
+import { payoutsRoutes } from '../../modules/payouts/src/payouts.routes'
+import { reportingRoutes } from '../../modules/platform-reporting/src/reporting.routes'
 import { NotificationsService } from '../../modules/platform-notifications/src/notifications.service'
 import { registerNotificationListeners } from '../../modules/platform-notifications/src/notifications.listeners'
+import { ParticipantsService } from '../../modules/participants/src/participants.service'
 
 // ─── Fastify augmentations ────────────────────────────────────────────────────
 
@@ -89,6 +92,19 @@ export async function buildApp() {
   // ── Tenancy ──
   await app.register(tenancyFastifyPlugin)
 
+  // ── Global error handler ──
+  app.setErrorHandler((error, _request, reply) => {
+    app.log.error(error)
+    const statusCode = error.statusCode ?? 500
+    reply.status(statusCode).send({
+      success: false,
+      error: {
+        code: error.code ?? 'INTERNAL_ERROR',
+        message: statusCode >= 500 ? 'Internal server error' : error.message,
+      },
+    })
+  })
+
   // ── Health check ──
   app.get('/health', { schema: { tags: ['System'] } }, async () => ({
     status: 'ok',
@@ -107,10 +123,16 @@ export async function buildApp() {
   await app.register(statementRoutes, { prefix: '/api/v1' })
   await app.register(approvalRoutes, { prefix: '/api/v1' })
   await app.register(adjustmentRoutes, { prefix: '/api/v1' })
+  await app.register(payoutsRoutes, { prefix: '/api/v1/payouts' })
+  await app.register(reportingRoutes, { prefix: '/api/v1/reports' })
 
   // ── Notification listeners ──
   const notificationsSvc = new NotificationsService(app.db)
-  registerNotificationListeners(notificationsSvc, async () => null) // participant→user resolver stub
+  const participantsSvc = new ParticipantsService(app.db)
+  registerNotificationListeners(
+    notificationsSvc,
+    (participantId) => participantsSvc.getUserIdForParticipant(participantId),
+  )
 
   return app
 }
