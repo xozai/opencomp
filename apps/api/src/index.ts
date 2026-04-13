@@ -23,6 +23,14 @@ import { reportingRoutes } from '../../../modules/platform-reporting/src/reporti
 import { quotaRoutes } from '../../../modules/quotas/src/quotas.routes'
 import { creditRoutes } from '../../../modules/credits/src/credits.routes'
 import { periodRoutes } from '../../../modules/periods/src/periods.routes'
+import { positionRoutes } from '../../../modules/positions/src/positions.routes'
+import { creditRuleRoutes } from '../../../modules/credit-rules/src/credit-rules.routes'
+import { measureRoutes } from '../../../modules/measures/src/measures.routes'
+import { earningsRoutes } from '../../../modules/earnings/src/earnings.routes'
+import { paymentRoutes } from '../../../modules/payments/src/payments.routes'
+import { nlRulesRoutes } from '../../../modules/nl-rules/src/nl-rules.routes'
+import { exchangeRateRoutes } from '../../../modules/exchange-rates/src/exchange-rates.routes'
+import { prorationRuleRoutes } from '../../../modules/proration-rules/src/proration-rules.routes'
 import { NotificationsService } from '../../../modules/platform-notifications/src/notifications.service'
 import { registerNotificationListeners } from '../../../modules/platform-notifications/src/notifications.listeners'
 import { ParticipantsService } from '../../../modules/participants/src/participants.service'
@@ -134,6 +142,14 @@ export async function buildApp() {
   await app.register(quotaRoutes, { prefix: '/api/v1' })
   await app.register(creditRoutes, { prefix: '/api/v1' })
   await app.register(periodRoutes, { prefix: '/api/v1' })
+  await app.register(positionRoutes, { prefix: '/api/v1' })
+  await app.register(creditRuleRoutes, { prefix: '/api/v1' })
+  await app.register(measureRoutes, { prefix: '/api/v1' })
+  await app.register(earningsRoutes, { prefix: '/api/v1' })
+  await app.register(paymentRoutes, { prefix: '/api/v1' })
+  await app.register(nlRulesRoutes, { prefix: '/api/v1' })
+  await app.register(exchangeRateRoutes, { prefix: '/api/v1' })
+  await app.register(prorationRuleRoutes, { prefix: '/api/v1' })
 
   // ── Plugin formula bridge ──
   for (const formula of pluginRegistry.getFormulas()) {

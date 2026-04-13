@@ -7,6 +7,8 @@ import {
   components,
   participants,
   quotas,
+  earningsResults,
+  calcExceptions,
 } from '../../../apps/api/src/db/schema'
 import { AuditService } from '../../platform-audit/src/audit.service'
 import type { AuditContext } from '../../platform-audit/src/audit.service'
@@ -18,6 +20,10 @@ import {
   CALCULATION_RUN_FAILED,
   createEvent,
 } from '../../../packages/events/src/domain-events'
+import { CreditingEngine } from '../../credit-rules/src/crediting.engine'
+import { MeasurementEngine } from '../../measures/src/measurement.engine'
+import { EarningsEngine } from '../../earnings/src/earnings.engine'
+import { PaymentsService } from '../../payments/src/payments.service'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -43,9 +49,17 @@ export interface PayoutLineItem {
 
 export class CalculationsService {
   private audit: AuditService
+  private creditingEngine: CreditingEngine
+  private measurementEngine: MeasurementEngine
+  private earningsEngine: EarningsEngine
+  private paymentsService: PaymentsService
 
   constructor(private db: Db) {
     this.audit = new AuditService(db)
+    this.creditingEngine = new CreditingEngine(db)
+    this.measurementEngine = new MeasurementEngine(db)
+    this.earningsEngine = new EarningsEngine(db)
+    this.paymentsService = new PaymentsService(db)
   }
 
   async getRun(tenantId: string, runId: string) {
@@ -149,6 +163,47 @@ export class CalculationsService {
         }
       }
 
+      // ── Full pipeline ──
+      const creditResult = await this.creditingEngine.applyCrediting(
+        tenantId,
+        input.periodId,
+        input.planVersionId,
+        run.id,
+      )
+
+      const measureResult = await this.measurementEngine.applyMeasures(
+        tenantId,
+        run.id,
+        input.periodId,
+        input.planVersionId,
+      )
+
+      const earningsResult = await this.earningsEngine.applyEarnings(
+        tenantId,
+        run.id,
+        input.periodId,
+        input.planVersionId,
+      )
+
+      const paymentsResult = await this.paymentsService.calculatePayments(
+        tenantId,
+        run.id,
+        input.periodId,
+        input.planVersionId,
+        ctx,
+      )
+
+      // ── Exception detection ──
+      const exceptionsRaised = await this.detectExceptions(tenantId, run.id, input.periodId)
+
+      const summary = {
+        creditsApplied: creditResult.creditsApplied,
+        measureResultsWritten: measureResult.measureResultsWritten,
+        earningsResultsWritten: earningsResult.earningsResultsWritten,
+        statementsGenerated: paymentsResult.statementsGenerated,
+        exceptionsRaised,
+      }
+
       // Mark run completed
       const [completed] = await this.db
         .update(calculationRuns)
@@ -157,6 +212,7 @@ export class CalculationsService {
           completedAt: new Date(),
           participantCount: successCount,
           errorCount,
+          config: { ...{}, summary },
           updatedAt: new Date(),
         })
         .where(eq(calculationRuns.id, run.id))
@@ -171,7 +227,7 @@ export class CalculationsService {
         entityType: 'calculation_run',
         entityId: run.id,
         action: 'completed',
-        after: { participantCount: successCount, errorCount },
+        after: { participantCount: successCount, errorCount, summary },
       })
 
       return completed
@@ -307,6 +363,159 @@ export class CalculationsService {
       .select()
       .from(payouts)
       .where(and(eq(payouts.tenantId, tenantId), eq(payouts.calculationRunId, calculationRunId)))
+  }
+
+  async getExceptions(tenantId: string, calculationRunId: string) {
+    return this.db
+      .select()
+      .from(calcExceptions)
+      .where(
+        and(
+          eq(calcExceptions.tenantId, tenantId),
+          eq(calcExceptions.calculationRunId, calculationRunId),
+        ),
+      )
+  }
+
+  async resolveException(
+    tenantId: string,
+    exceptionId: string,
+    status: 'resolved' | 'dismissed',
+    resolvedById: string,
+    ctx: AuditContext,
+  ) {
+    const [existing] = await this.db
+      .select()
+      .from(calcExceptions)
+      .where(and(eq(calcExceptions.tenantId, tenantId), eq(calcExceptions.id, exceptionId)))
+      .limit(1)
+
+    if (!existing) throw new CalculationError('EXCEPTION_NOT_FOUND', 'Exception not found')
+
+    const [updated] = await this.db
+      .update(calcExceptions)
+      .set({
+        status,
+        resolvedById,
+        resolvedAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(and(eq(calcExceptions.tenantId, tenantId), eq(calcExceptions.id, exceptionId)))
+      .returning()
+
+    await this.audit.recordSafe({
+      ctx,
+      entityType: 'calc_exception',
+      entityId: exceptionId,
+      action: status,
+      after: { status, resolvedById },
+    })
+
+    return updated
+  }
+
+  private async detectExceptions(
+    tenantId: string,
+    calculationRunId: string,
+    periodId: string,
+  ): Promise<number> {
+    const thresholdCents = Number(process.env.EXCEPTION_TX_THRESHOLD_CENTS ?? 50_000_000)
+    let exceptionsRaised = 0
+
+    // Load all earnings results for this run
+    const allEarnings = await this.db
+      .select()
+      .from(earningsResults)
+      .where(
+        and(
+          eq(earningsResults.tenantId, tenantId),
+          eq(earningsResults.calculationRunId, calculationRunId),
+        ),
+      )
+
+    // Load credits for this run's period to check large transactions
+    const allCredits = await this.db
+      .select()
+      .from(credits)
+      .where(
+        and(
+          eq(credits.tenantId, tenantId),
+          eq(credits.periodId, periodId),
+        ),
+      )
+
+    const writeException = async (params: {
+      participantId: string
+      componentId?: string
+      exceptionType: string
+      severity?: string
+      message: string
+      details?: Record<string, unknown>
+    }) => {
+      await this.db
+        .insert(calcExceptions)
+        .values({
+          tenantId,
+          calculationRunId,
+          participantId: params.participantId,
+          componentId: params.componentId ?? null,
+          exceptionType: params.exceptionType,
+          severity: params.severity ?? 'warning',
+          message: params.message,
+          details: params.details ?? {},
+          status: 'open',
+        })
+        .onConflictDoNothing()
+      exceptionsRaised++
+    }
+
+    for (const er of allEarnings) {
+      const attainmentPct = parseFloat(er.attainmentPct as string)
+
+      // High attainment
+      if (attainmentPct > 300) {
+        await writeException({
+          participantId: er.participantId,
+          componentId: er.componentId,
+          exceptionType: 'high_attainment',
+          message: `Attainment ${attainmentPct.toFixed(1)}% exceeds 300% threshold`,
+          details: { attainmentPct, calculationRunId },
+        })
+      }
+
+      // Zero earnings (participant has credits but grossEarningsCents = 0)
+      const hasCredits = allCredits.some(
+        (c) => c.participantId === er.participantId && c.componentId === er.componentId,
+      )
+      if (hasCredits && er.grossEarningsCents === 0) {
+        await writeException({
+          participantId: er.participantId,
+          componentId: er.componentId,
+          exceptionType: 'zero_earnings',
+          message: 'Participant has credits but zero gross earnings',
+          details: { componentId: er.componentId },
+        })
+      }
+    }
+
+    // Check for large transactions
+    const processedTxIds = new Set<string>()
+    for (const credit of allCredits) {
+      if (processedTxIds.has(credit.transactionId)) continue
+      processedTxIds.add(credit.transactionId)
+
+      if (credit.amountCents > thresholdCents) {
+        await writeException({
+          participantId: credit.participantId,
+          exceptionType: 'large_transaction',
+          severity: 'warning',
+          message: `Transaction amount ${credit.amountCents} cents exceeds threshold ${thresholdCents} cents`,
+          details: { transactionId: credit.transactionId, amountCents: credit.amountCents },
+        })
+      }
+    }
+
+    return exceptionsRaised
   }
 }
 

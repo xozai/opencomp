@@ -26,6 +26,7 @@
     "@fastify/swagger-ui": "^4.0.1",
     "@opencomp/contracts": "workspace:*",
     "@opencomp/events": "workspace:*",
+    "@opencomp/nl-rules": "workspace:*",
     "dotenv": "^16.4.5",
     "drizzle-orm": "^0.30.0",
     "fastify": "^4.27.0",

@@ -11,6 +11,7 @@ import {
   boolean,
   integer,
   jsonb,
+  numeric,
   pgTable,
   text,
   timestamp,
@@ -325,4 +326,222 @@ export const notifications = pgTable('notifications', {
   readAt: timestamp('read_at', { withTimezone: true }),
   metadata: jsonb('metadata').default({}).notNull(),
   createdAt: now(),
+})
+
+// ─── Positions ────────────────────────────────────────────────────────────────
+
+export const positions = pgTable('positions', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  tenantId: tenantId(),
+  name: text('name').notNull(),
+  type: text('type').notNull(), // rep | overlay | manager | executive
+  parentPositionId: uuid('parent_position_id'),
+  participantId: uuid('participant_id').references(() => participants.id),
+  effectiveFrom: text('effective_from').notNull(),
+  effectiveTo: text('effective_to'),
+  metadata: jsonb('metadata').default({}).notNull(),
+  createdAt: now(),
+  updatedAt: updatedAt(),
+  deletedAt: deletedAt(),
+})
+
+export const positionRelationships = pgTable('position_relationships', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  tenantId: tenantId(),
+  fromPositionId: uuid('from_position_id').notNull().references(() => positions.id),
+  toPositionId: uuid('to_position_id').notNull().references(() => positions.id),
+  relationshipType: text('relationship_type').notNull(), // reports_to | overlay_on | inherits_from
+  splitPct: integer('split_pct').notNull().default(100),
+  createdAt: now(),
+  updatedAt: updatedAt(),
+})
+
+// ─── Credit Rules ─────────────────────────────────────────────────────────────
+
+export const creditRules = pgTable('credit_rules', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  tenantId: tenantId(),
+  planVersionId: uuid('plan_version_id').references(() => planVersions.id),
+  name: text('name').notNull(),
+  description: text('description'),
+  naturalLanguageDefinition: text('natural_language_definition'),
+  parsedDefinition: jsonb('parsed_definition'),
+  priority: integer('priority').notNull().default(0),
+  isActive: boolean('is_active').notNull().default(true),
+  createdAt: now(),
+  updatedAt: updatedAt(),
+})
+
+export const creditRuleConditions = pgTable('credit_rule_conditions', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  tenantId: tenantId(),
+  creditRuleId: uuid('credit_rule_id').notNull().references(() => creditRules.id),
+  field: text('field').notNull(),
+  operator: text('operator').notNull(),
+  value: text('value').notNull(),
+  createdAt: now(),
+})
+
+export const creditRuleActions = pgTable('credit_rule_actions', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  tenantId: tenantId(),
+  creditRuleId: uuid('credit_rule_id').notNull().references(() => creditRules.id),
+  actionType: text('action_type').notNull(), // assign_to_position | assign_to_participant | split | inherit_to_parent
+  targetType: text('target_type').notNull(), // position_type | position_id | participant_attribute
+  targetValue: text('target_value').notNull(),
+  splitPct: integer('split_pct').notNull().default(100),
+  inheritanceDepth: integer('inheritance_depth').notNull().default(0),
+  createdAt: now(),
+})
+
+// ─── Measures ─────────────────────────────────────────────────────────────────
+
+export const measureDefinitions = pgTable('measure_definitions', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  tenantId: tenantId(),
+  planVersionId: uuid('plan_version_id').references(() => planVersions.id),
+  componentId: uuid('component_id').references(() => components.id),
+  name: text('name').notNull(),
+  aggregationType: text('aggregation_type').notNull(), // sum | count | average | max | min | weighted_average
+  filterConditions: jsonb('filter_conditions').default([]).notNull(),
+  unitType: text('unit_type').notNull().default('currency'), // currency | count | percentage
+  currency: text('currency').notNull().default('USD'),
+  naturalLanguageDefinition: text('natural_language_definition'),
+  parsedDefinition: jsonb('parsed_definition'),
+  createdAt: now(),
+  updatedAt: updatedAt(),
+})
+
+export const measureResults = pgTable('measure_results', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  tenantId: tenantId(),
+  calculationRunId: uuid('calculation_run_id').notNull().references(() => calculationRuns.id),
+  participantId: uuid('participant_id').notNull().references(() => participants.id),
+  positionId: uuid('position_id').references(() => positions.id),
+  componentId: uuid('component_id').notNull().references(() => components.id),
+  periodId: uuid('period_id').notNull().references(() => periods.id),
+  measuredValue: numeric('measured_value').notNull().default('0'),
+  transactionCount: integer('transaction_count').notNull().default(0),
+  currency: text('currency').notNull().default('USD'),
+  breakdown: jsonb('breakdown').default([]).notNull(),
+  createdAt: now(),
+})
+
+// ─── Earnings ─────────────────────────────────────────────────────────────────
+
+export const earningsRules = pgTable('earnings_rules', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  tenantId: tenantId(),
+  planVersionId: uuid('plan_version_id').references(() => planVersions.id),
+  componentId: uuid('component_id').references(() => components.id),
+  basisType: text('basis_type').notNull().default('aggregate'), // aggregate | per_transaction
+  formulaType: text('formula_type').notNull(), // flat_rate | tiered | accelerated | mbo | draw | guarantee
+  formulaConfig: jsonb('formula_config').notNull().default({}),
+  cap: jsonb('cap'),
+  quotaRef: text('quota_ref'),
+  naturalLanguageDefinition: text('natural_language_definition'),
+  parsedDefinition: jsonb('parsed_definition'),
+  dependsOnComponentId: uuid('depends_on_component_id').references(() => components.id),
+  createdAt: now(),
+  updatedAt: updatedAt(),
+})
+
+export const earningsResults = pgTable('earnings_results', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  tenantId: tenantId(),
+  calculationRunId: uuid('calculation_run_id').notNull().references(() => calculationRuns.id),
+  participantId: uuid('participant_id').notNull().references(() => participants.id),
+  positionId: uuid('position_id').references(() => positions.id),
+  componentId: uuid('component_id').notNull().references(() => components.id),
+  periodId: uuid('period_id').notNull().references(() => periods.id),
+  grossEarningsCents: integer('gross_earnings_cents').notNull().default(0),
+  cappedEarningsCents: integer('capped_earnings_cents').notNull().default(0),
+  attainmentPct: numeric('attainment_pct').notNull().default('0'),
+  formulaBreakdown: jsonb('formula_breakdown').notNull().default({}),
+  createdAt: now(),
+})
+
+// ─── Payments ─────────────────────────────────────────────────────────────────
+
+export const paymentBalances = pgTable('payment_balances', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  tenantId: tenantId(),
+  participantId: uuid('participant_id').notNull().references(() => participants.id),
+  componentId: uuid('component_id').notNull().references(() => components.id),
+  periodId: uuid('period_id').notNull().references(() => periods.id),
+  openingBalanceCents: integer('opening_balance_cents').notNull().default(0),
+  earningsCents: integer('earnings_cents').notNull().default(0),
+  paidCents: integer('paid_cents').notNull().default(0),
+  closingBalanceCents: integer('closing_balance_cents').notNull().default(0),
+  drawRecoveryCents: integer('draw_recovery_cents').notNull().default(0),
+  currency: text('currency').notNull().default('USD'),
+  status: text('status').notNull().default('pending'), // pending | approved | paid | restated
+  paidAt: timestamp('paid_at', { withTimezone: true }),
+  lockedAt: timestamp('locked_at', { withTimezone: true }),
+  createdAt: now(),
+  updatedAt: updatedAt(),
+})
+
+export const paymentStatements = pgTable('payment_statements', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  tenantId: tenantId(),
+  participantId: uuid('participant_id').notNull().references(() => participants.id),
+  periodId: uuid('period_id').notNull().references(() => periods.id),
+  calculationRunId: uuid('calculation_run_id').notNull().references(() => calculationRuns.id),
+  totalEarningsCents: integer('total_earnings_cents').notNull().default(0),
+  totalPaidCents: integer('total_paid_cents').notNull().default(0),
+  totalOpeningBalanceCents: integer('total_opening_balance_cents').notNull().default(0),
+  totalClosingBalanceCents: integer('total_closing_balance_cents').notNull().default(0),
+  currency: text('currency').notNull().default('USD'),
+  status: text('status').notNull().default('draft'), // draft | approved | paid
+  lineItems: jsonb('line_items').notNull().default([]),
+  approvedAt: timestamp('approved_at', { withTimezone: true }),
+  approvedById: uuid('approved_by_id').references(() => users.id),
+  paidAt: timestamp('paid_at', { withTimezone: true }),
+  paidById: uuid('paid_by_id').references(() => users.id),
+  createdAt: now(),
+  updatedAt: updatedAt(),
+})
+
+// ─── Complementary ────────────────────────────────────────────────────────────
+
+export const calcExceptions = pgTable('calc_exceptions', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  tenantId: tenantId(),
+  calculationRunId: uuid('calculation_run_id').notNull().references(() => calculationRuns.id),
+  participantId: uuid('participant_id').notNull().references(() => participants.id),
+  componentId: uuid('component_id').references(() => components.id),
+  exceptionType: text('exception_type').notNull(), // high_earnings | high_attainment | large_transaction | zero_earnings | custom
+  severity: text('severity').notNull().default('warning'), // info | warning | error
+  message: text('message').notNull(),
+  details: jsonb('details').notNull().default({}),
+  status: text('status').notNull().default('open'), // open | resolved | dismissed
+  resolvedById: uuid('resolved_by_id').references(() => users.id),
+  resolvedAt: timestamp('resolved_at', { withTimezone: true }),
+  createdAt: now(),
+  updatedAt: updatedAt(),
+})
+
+export const exchangeRates = pgTable('exchange_rates', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  tenantId: tenantId(),
+  fromCurrency: text('from_currency').notNull(),
+  toCurrency: text('to_currency').notNull(),
+  rate: numeric('rate').notNull(),
+  effectiveDate: text('effective_date').notNull(),
+  source: text('source').notNull().default('manual'),
+  createdAt: now(),
+  updatedAt: updatedAt(),
+})
+
+export const prorationRules = pgTable('proration_rules', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  tenantId: tenantId(),
+  planVersionId: uuid('plan_version_id').references(() => planVersions.id),
+  triggerType: text('trigger_type').notNull(), // hire | termination | leave | plan_change
+  method: text('method').notNull().default('calendar_days'), // calendar_days | working_days | none
+  minimumDays: integer('minimum_days').notNull().default(0),
+  isActive: boolean('is_active').notNull().default(true),
+  createdAt: now(),
+  updatedAt: updatedAt(),
 })
