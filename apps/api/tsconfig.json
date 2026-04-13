@@ -2,9 +2,16 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "dist",
-    "rootDir": "src",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext"
+    "module": "ESNext",
+    "moduleResolution": "bundler"
   },
-  "include": ["src"]
+  "include": [
+    "src",
+    "../../modules/*/src",
+    "../../packages/events/src",
+    "../../packages/sdk/src",
+    "../../packages/contracts/src",
+    "../../packages/testing/src",
+    "../../plugins/sample-plan-rules/src"
+  ]
 }

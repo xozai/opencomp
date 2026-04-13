@@ -18,7 +18,7 @@ export function createEvent<T>(
     tenantId,
     occurredAt: new Date().toISOString(),
     payload,
-    metadata,
+    ...(metadata !== undefined ? { metadata } : {}),
   }
 }
 

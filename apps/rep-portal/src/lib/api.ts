@@ -76,7 +76,7 @@ export const auth = {
     apiFetch<{ success: true; data: { accessToken: string; refreshToken: string } }>(
       '/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) }
     ),
-  me: () => apiFetch<{ success: true; data: { sub: string; email: string; role: string } }>('/auth/me'),
+  me: () => apiFetch<{ success: true; data: { sub: string; email: string; role: string; participantId?: string } }>('/auth/me'),
 }
 
 export const goalSheetsApi = {
@@ -86,6 +86,10 @@ export const goalSheetsApi = {
   },
   acknowledge: (id: string) =>
     apiFetch<{ success: true; data: unknown }>(`/goal-sheets/${id}/acknowledge`, { method: 'POST' }),
+}
+
+export const periodsApi = {
+  list: () => apiFetch<{ success: true; data: unknown[] }>('/periods'),
 }
 
 export const statementsApi = {

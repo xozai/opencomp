@@ -113,7 +113,7 @@ export class TransactionsService {
       participantId = p?.id ?? null
     }
 
-    const [tx] = await this.db
+    const rows = await this.db
       .insert(sourceTransactions)
       .values({
         tenantId,
@@ -128,6 +128,7 @@ export class TransactionsService {
         validationErrors: [],
       })
       .returning()
+    const tx = rows[0]!
 
     await this.audit.recordSafe({
       ctx,
@@ -191,7 +192,7 @@ export class TransactionsService {
     const isValid = errors.length === 0
     const newStatus = isValid ? 'validated' : 'invalid'
 
-    const [updated] = await this.db
+    const updateRows = await this.db
       .update(sourceTransactions)
       .set({
         status: newStatus,
@@ -201,6 +202,7 @@ export class TransactionsService {
       })
       .where(eq(sourceTransactions.id, transactionId))
       .returning()
+    const updated = updateRows[0]!
 
     await this.audit.recordSafe({
       ctx,

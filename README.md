@@ -104,18 +104,21 @@ pnpm db:seed
 pnpm dev
 ```
 
-The API will be available at `http://localhost:3000`.
+The API will be available at `http://localhost:3100`.
 Admin portal: `http://localhost:3001`
 Rep portal: `http://localhost:3002`
-API docs: `http://localhost:3000/docs`
+API docs: `http://localhost:3100/docs`
 
 ### Demo credentials (seeded)
 
 | Role | Email | Password |
 |---|---|---|
-| Admin | admin@demo.opencomp.dev | `demo-admin` |
-| Sales Rep | rep@demo.opencomp.dev | `demo-rep` |
-| Manager | manager@demo.opencomp.dev | `demo-manager` |
+| Admin | `admin@acme.example` | `admin123` |
+| Manager | `manager@acme.example` | `manager123` |
+| Rep (Demo) | `rep@acme.example` | `rep123` |
+| Rep (Alice) | `alice.chen@acme.example` | `rep123` |
+| Rep (Bob) | `bob.smith@acme.example` | `rep123` |
+| Rep (Carol) | `carol.davis@acme.example` | `rep123` |
 
 ---
 
@@ -148,15 +151,42 @@ We welcome contributors of all experience levels.
 
 ---
 
+## What's Built
+
+### Admin Portal (`http://localhost:3001`)
+
+| Page | Description |
+|---|---|
+| **Plans** | Create and manage comp plans; view plan versions and components |
+| **Plan Versions & Components** | Define formula components (commission, bonus, spiff, MBO, draw, guarantee) per version; publish versions |
+| **Periods** | Create and manage compensation periods (e.g. Q1 2026) |
+| **Transactions** | View source transactions ingested from CRM; filter by status |
+| **Calculations** | Trigger and monitor calculation runs by period |
+| **Goal Sheets** | Generate and distribute goal sheets to reps for a period + plan version |
+| **Adjustments** | Apply manual adjustments (increase/decrease/clawback/correction) to payouts |
+| **Reports** | Payout summary with CSV export; attainment report by calculation run |
+| **Disputes** | View and manage open disputes across all reps |
+| **Approvals** | Review and action approval requests |
+
+### Rep Portal (`http://localhost:3002`)
+
+| Page | Description |
+|---|---|
+| **Goal Sheets** | View distributed goal sheets with quota targets (component, amount, currency); acknowledge receipt |
+| **Statements** | View payout statement for a selected period |
+| **Disputes** | File a dispute with period, amount in dispute, subject, and description; track status |
+
+---
+
 ## Roadmap
 
 | Phase | Status | Description |
 |---|---|---|
 | Phase 1 | ✅ Complete | Repo foundation, governance, CI |
-| Phase 2 | 🚧 In progress | Platform kernel (auth, tenancy, audit, events) |
-| Phase 3 | 📋 Planned | Workflow 1: Plan design → goal sheet distribution |
-| Phase 4 | 📋 Planned | Workflow 2: Sales comp calculation |
-| Phase 5 | 📋 Planned | Workflow 3: Dispute resolution |
+| Phase 2 | ✅ Complete | Platform kernel (auth, tenancy, audit, events) |
+| Phase 3 | ✅ Complete | Workflow 1: Plan design → goal sheet distribution |
+| Phase 4 | 🚧 In progress | Workflow 2: Sales comp calculation |
+| Phase 5 | ✅ Complete | Workflow 3: Dispute resolution |
 | Phase 6 | 📋 Planned | Plugin examples and contributor readiness |
 
 Full roadmap: [docs/ROADMAP.md](docs/ROADMAP.md)
@@ -165,6 +195,13 @@ Full roadmap: [docs/ROADMAP.md](docs/ROADMAP.md)
 
 ## License
 
-Apache 2.0 — see [LICENSE](LICENSE).
+**Apache 2.0** — see [LICENSE](LICENSE).
+
+Apache 2.0 was chosen over MIT (no patent grant), AGPL-3.0 (blocks enterprise adoption and proprietary plugins), and BSL (not truly open-source) because it:
+
+- Includes an explicit **patent grant**, which enterprise legal teams require
+- Allows **proprietary plugins and integrations** without forcing them open
+- Is **compatible** with the broadest range of open-source dependencies
+- Signals that OpenComp is safe for enterprise use without hidden obligations
 
 OpenComp is free to use, fork, and extend. Contributions back to the project are encouraged but not required.

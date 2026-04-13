@@ -77,6 +77,12 @@ export async function planRoutes(app: FastifyInstance) {
     }
   })
 
+  // GET /plans/:planId/versions
+  app.get('/plans/:planId/versions', { preHandler: [app.authenticate] }, async (request: any, reply) => {
+    const data = await svc.listVersions(request.tenantId, request.params.planId)
+    return reply.send({ success: true, data })
+  })
+
   // GET /plans/:planId/versions/:versionId/components
   app.get('/plans/:planId/versions/:versionId/components', { preHandler: [app.authenticate] }, async (request: any, reply) => {
     const data = await svc.listComponents(request.tenantId, request.params.versionId)

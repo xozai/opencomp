@@ -1,9 +1,12 @@
-import { createFileRoute, redirect } from '@tanstack/react-router'
+import { createRoute, redirect } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
-import { getAccessToken, statementsApi, auth } from '../lib/api'
+import { getAccessToken, statementsApi, periodsApi, auth } from '../lib/api'
+import { Route as rootRoute } from './__root'
 
-export const Route = createFileRoute('/statements')({
+export const Route = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/statements',
   beforeLoad: () => {
     if (!getAccessToken()) throw redirect({ to: '/login' })
   },
@@ -23,17 +26,22 @@ type Statement = {
   generatedAt: string
 }
 
+type Period = { id: string; name: string; isClosed: boolean }
+
 function StatementsPage() {
   const meQuery = useQuery({ queryKey: ['me'], queryFn: () => auth.me() })
-  const [periodId, setPeriodId] = useState('')
-  const [queriedPeriod, setQueriedPeriod] = useState('')
+  const periodsQuery = useQuery({ queryKey: ['periods'], queryFn: () => periodsApi.list() })
+  const periods = (periodsQuery.data?.data ?? []) as Period[]
 
-  const participantId = meQuery.data?.data.sub ?? ''
+  const participantId = meQuery.data?.data.participantId ?? ''
+
+  const [selectedPeriodId, setSelectedPeriodId] = useState('')
+  const periodId = selectedPeriodId || (periods[0]?.id ?? '')
 
   const statementQuery = useQuery({
-    queryKey: ['statement', participantId, queriedPeriod],
-    queryFn: () => statementsApi.get(participantId, queriedPeriod),
-    enabled: !!participantId && !!queriedPeriod,
+    queryKey: ['statement', participantId, periodId],
+    queryFn: () => statementsApi.get(participantId, periodId),
+    enabled: !!participantId && !!periodId,
   })
 
   const statement = statementQuery.data?.data as Statement | undefined
@@ -42,20 +50,20 @@ function StatementsPage() {
     <div className="p-8 max-w-2xl">
       <h1 className="text-xl font-semibold text-gray-900 mb-6">Compensation Statement</h1>
 
-      <form
-        onSubmit={(e) => { e.preventDefault(); setQueriedPeriod(periodId) }}
-        className="flex gap-3 mb-8"
-      >
-        <input
-          value={periodId}
-          onChange={(e) => setPeriodId(e.target.value)}
-          placeholder="Period ID (UUID)"
-          className="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm"
-        />
-        <button type="submit" className="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm hover:bg-indigo-700">
-          View
-        </button>
-      </form>
+      <div className="mb-8">
+        <label className="block text-xs text-gray-500 mb-1">Period</label>
+        <select
+          value={selectedPeriodId || periodId}
+          onChange={(e) => setSelectedPeriodId(e.target.value)}
+          className="border border-gray-300 rounded-md px-3 py-2 text-sm w-64"
+        >
+          {periods.map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.name}{p.isClosed ? ' (closed)' : ''}
+            </option>
+          ))}
+        </select>
+      </div>
 
       {statementQuery.isLoading && <p className="text-sm text-gray-500">Loading…</p>}
       {statementQuery.isError && <p className="text-sm text-red-500">Statement not found for this period.</p>}

@@ -6,23 +6,29 @@ import swagger from '@fastify/swagger'
 import swaggerUi from '@fastify/swagger-ui'
 import fjwt from '@fastify/jwt'
 import { getDb } from './db/client'
-import { tenancyFastifyPlugin } from '../../modules/platform-tenancy/src/tenancy.plugin'
-import { authRoutes } from '../../modules/platform-auth/src/auth.routes'
-import type { JwtPayload } from '../../modules/platform-auth/src/auth.service'
-import { planRoutes } from '../../modules/plans/src/plans.routes'
-import { goalSheetRoutes } from '../../modules/goalsheets/src/goalsheets.routes'
-import { transactionRoutes } from '../../modules/transactions/src/transactions.routes'
-import { calculationRoutes } from '../../modules/calculations/src/calculations.routes'
-import { disputeRoutes } from '../../modules/disputes/src/disputes.routes'
-import { participantRoutes } from '../../modules/participants/src/participants.routes'
-import { statementRoutes } from '../../modules/statements/src/statements.routes'
-import { approvalRoutes } from '../../modules/approvals/src/approvals.routes'
-import { adjustmentRoutes } from '../../modules/adjustments/src/adjustments.routes'
-import { payoutsRoutes } from '../../modules/payouts/src/payouts.routes'
-import { reportingRoutes } from '../../modules/platform-reporting/src/reporting.routes'
-import { NotificationsService } from '../../modules/platform-notifications/src/notifications.service'
-import { registerNotificationListeners } from '../../modules/platform-notifications/src/notifications.listeners'
-import { ParticipantsService } from '../../modules/participants/src/participants.service'
+import { tenancyFastifyPlugin } from '../../../modules/platform-tenancy/src/tenancy.plugin'
+import { authRoutes } from '../../../modules/platform-auth/src/auth.routes'
+import type { JwtPayload } from '../../../modules/platform-auth/src/auth.service'
+import { planRoutes } from '../../../modules/plans/src/plans.routes'
+import { goalSheetRoutes } from '../../../modules/goalsheets/src/goalsheets.routes'
+import { transactionRoutes } from '../../../modules/transactions/src/transactions.routes'
+import { calculationRoutes } from '../../../modules/calculations/src/calculations.routes'
+import { disputeRoutes } from '../../../modules/disputes/src/disputes.routes'
+import { participantRoutes } from '../../../modules/participants/src/participants.routes'
+import { statementRoutes } from '../../../modules/statements/src/statements.routes'
+import { approvalRoutes } from '../../../modules/approvals/src/approvals.routes'
+import { adjustmentRoutes } from '../../../modules/adjustments/src/adjustments.routes'
+import { payoutsRoutes } from '../../../modules/payouts/src/payouts.routes'
+import { reportingRoutes } from '../../../modules/platform-reporting/src/reporting.routes'
+import { quotaRoutes } from '../../../modules/quotas/src/quotas.routes'
+import { creditRoutes } from '../../../modules/credits/src/credits.routes'
+import { periodRoutes } from '../../../modules/periods/src/periods.routes'
+import { NotificationsService } from '../../../modules/platform-notifications/src/notifications.service'
+import { registerNotificationListeners } from '../../../modules/platform-notifications/src/notifications.listeners'
+import { ParticipantsService } from '../../../modules/participants/src/participants.service'
+import { pluginRegistry } from '../../../packages/sdk/src'
+import { rulesEngine } from '../../../modules/platform-rules/src/rules-engine'
+import '../../../plugins/sample-plan-rules/src/index'
 
 // ─── Fastify augmentations ────────────────────────────────────────────────────
 
@@ -125,6 +131,21 @@ export async function buildApp() {
   await app.register(adjustmentRoutes, { prefix: '/api/v1' })
   await app.register(payoutsRoutes, { prefix: '/api/v1/payouts' })
   await app.register(reportingRoutes, { prefix: '/api/v1/reports' })
+  await app.register(quotaRoutes, { prefix: '/api/v1' })
+  await app.register(creditRoutes, { prefix: '/api/v1' })
+  await app.register(periodRoutes, { prefix: '/api/v1' })
+
+  // ── Plugin formula bridge ──
+  for (const formula of pluginRegistry.getFormulas()) {
+    if (!rulesEngine.has(formula.id)) {
+      rulesEngine.register({
+        id: formula.id,
+        name: formula.name,
+        description: formula.description,
+        formula: (ctx) => formula.calculate(ctx),
+      })
+    }
+  }
 
   // ── Notification listeners ──
   const notificationsSvc = new NotificationsService(app.db)
@@ -137,9 +158,26 @@ export async function buildApp() {
   return app
 }
 
+// ─── Env validation ───────────────────────────────────────────────────────────
+
+function validateEnv() {
+  const required = ['DATABASE_URL', 'JWT_SECRET']
+  const missing = required.filter((k) => !process.env[k])
+  if (missing.length) {
+    throw new Error(`Missing required environment variables: ${missing.join(', ')}`)
+  }
+  if (!process.env.REDIS_URL) {
+    console.warn('[opencomp] REDIS_URL not set — async job queues will not function')
+  }
+  if (!process.env.DEFAULT_TENANT_ID) {
+    console.warn('[opencomp] DEFAULT_TENANT_ID not set — tenant resolution falls back to subdomain')
+  }
+}
+
 // ─── Start ────────────────────────────────────────────────────────────────────
 
 async function start() {
+  validateEnv()
   const app = await buildApp()
   const port = Number(process.env.API_PORT ?? 3000)
   const host = process.env.API_HOST ?? '0.0.0.0'

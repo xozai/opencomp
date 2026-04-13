@@ -2,7 +2,7 @@ import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import { z } from 'zod'
 import type { Db } from '../../../apps/api/src/db/client'
-import { users } from '../../../apps/api/src/db/schema'
+import { users, participants } from '../../../apps/api/src/db/schema'
 import { eq, and, isNull } from 'drizzle-orm'
 
 // ─── Config ───────────────────────────────────────────────────────────────────
@@ -36,6 +36,7 @@ export interface JwtPayload {
   tenantId: string
   email: string
   role: string
+  participantId?: string
   type: 'access' | 'refresh'
 }
 
@@ -75,11 +76,22 @@ export class AuthService {
       .set({ lastLoginAt: new Date() })
       .where(eq(users.id, user.id))
 
+    let participantId: string | undefined
+    if (user.role === 'rep') {
+      const [p] = await this.db
+        .select({ id: participants.id })
+        .from(participants)
+        .where(and(eq(participants.userId, user.id), isNull(participants.deletedAt)))
+        .limit(1)
+      participantId = p?.id
+    }
+
     return this.issueTokenPair({
       sub: user.id,
       tenantId: user.tenantId,
       email: user.email,
       role: user.role,
+      participantId,
     })
   }
 
@@ -132,7 +144,7 @@ export class AuthService {
     return bcrypt.hash(password, rounds)
   }
 
-  private issueTokenPair(claims: Omit<JwtPayload, 'type'>): TokenPair {
+  private issueTokenPair(claims: Omit<JwtPayload, 'type'> & { participantId?: string }): TokenPair {
     const secret = getJwtSecret()
     const accessToken = jwt.sign({ ...claims, type: 'access' }, secret, {
       expiresIn: ACCESS_TOKEN_TTL,

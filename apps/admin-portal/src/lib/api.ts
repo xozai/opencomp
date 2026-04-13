@@ -127,6 +127,26 @@ export const plansApi = {
     apiFetch<{ success: true; data: unknown }>(`/plans/${id}/publish`, { method: 'POST' }),
 }
 
+// ─── Plan Versions ────────────────────────────────────────────────────────────
+
+export const planVersionsApi = {
+  list: (planId: string) =>
+    apiFetch<{ success: true; data: unknown[] }>(`/plans/${planId}/versions`),
+  publish: (planId: string) =>
+    apiFetch<{ success: true; data: unknown }>(`/plans/${planId}/publish`, { method: 'POST' }),
+}
+
+// ─── Components ───────────────────────────────────────────────────────────────
+
+export const componentsApi = {
+  list: (planId: string, versionId: string) =>
+    apiFetch<{ success: true; data: unknown[] }>(`/plans/${planId}/versions/${versionId}/components`),
+  create: (planId: string, versionId: string, body: unknown) =>
+    apiFetch<{ success: true; data: unknown }>(`/plans/${planId}/versions/${versionId}/components`, {
+      method: 'POST', body: JSON.stringify(body),
+    }),
+}
+
 // ─── Goal Sheets ──────────────────────────────────────────────────────────────
 
 export const goalSheetsApi = {
@@ -216,6 +236,55 @@ export const payoutsApi = {
     ),
 }
 
+// ─── Quotas ───────────────────────────────────────────────────────────────────
+
+export const quotasApi = {
+  list: (params?: { periodId?: string; participantId?: string }) => {
+    const qs = params ? '?' + new URLSearchParams(params as Record<string, string>).toString() : ''
+    return apiFetch<{ success: true; data: unknown[] }>(`/quotas${qs}`)
+  },
+  bulkUpsert: (body: unknown[]) =>
+    apiFetch<{ success: true; data: unknown[] }>('/quotas/bulk', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
+}
+
+// ─── Periods ──────────────────────────────────────────────────────────────────
+
+export const periodsApi = {
+  list: () => apiFetch<{ success: true; data: unknown[] }>('/periods'),
+  create: (body: unknown) =>
+    apiFetch<{ success: true; data: unknown }>('/periods', { method: 'POST', body: JSON.stringify(body) }),
+  close: (id: string) =>
+    apiFetch<{ success: true; data: unknown }>(`/periods/${id}/close`, { method: 'POST' }),
+}
+
+// ─── Transactions ─────────────────────────────────────────────────────────────
+
+export const transactionsApi = {
+  list: (params?: Record<string, string>) => {
+    const qs = params ? '?' + new URLSearchParams(params).toString() : ''
+    return apiFetch<{ success: true; data: unknown[]; total: number }>(`/transactions${qs}`)
+  },
+  ingest: (body: unknown) =>
+    apiFetch<{ success: true; data: unknown }>('/transactions/ingest/bulk', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
+  validatePending: () =>
+    apiFetch<{ success: true; data: unknown }>('/transactions/validate-pending', { method: 'POST' }),
+}
+
+// ─── Credits ──────────────────────────────────────────────────────────────────
+
+export const creditsApi = {
+  creditPeriod: (body: { periodId: string; planVersionId: string }) =>
+    apiFetch<{ success: true; data: { credited: number; skipped: number; errors: unknown[]; total: number } }>(
+      '/credits/period', { method: 'POST', body: JSON.stringify(body) }
+    ),
+}
+
 // ─── Reporting ────────────────────────────────────────────────────────────────
 
 export const reportingApi = {
@@ -227,4 +296,13 @@ export const reportingApi = {
   },
   attainmentBreakdown: (runId: string) =>
     apiFetch<{ success: true; data: unknown[] }>(`/reports/attainment/${runId}`),
+  downloadPayoutsCsv: async (periodId: string) => {
+    const headers: Record<string, string> = {}
+    if (_accessToken) headers['Authorization'] = `Bearer ${_accessToken}`
+    const tenantId = import.meta.env.VITE_DEFAULT_TENANT_ID
+    if (tenantId) headers['X-Tenant-Id'] = tenantId
+    const res = await fetch(`${BASE_URL}/reports/payouts/csv?periodId=${periodId}`, { headers })
+    if (!res.ok) throw new ApiError(res.status, {})
+    return res.blob()
+  },
 }

@@ -79,10 +79,11 @@ export class QuotasService {
       return updated
     }
 
-    const [created] = await this.db
+    const createdRows = await this.db
       .insert(quotas)
       .values({ tenantId, ...data })
       .returning()
+    const created = createdRows[0]!
 
     await this.audit.recordSafe({
       ctx,

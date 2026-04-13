@@ -11,7 +11,7 @@ export async function statementRoutes(app: FastifyInstance) {
   })
 
   // POST /statements/generate — generate statements for a run
-  app.post('/statements/generate', { preHandler: [app.authenticate] }, async (req: any, reply) => {
+  app.post('/statements/generate', { preHandler: [app.authenticate] }, async (req: any, reply: any) => {
     try {
       const input = GenerateStatementsSchema.parse(req.body)
       const data = await svc.generateForRun(req.tenantId, input, getCtx(req))
@@ -27,7 +27,7 @@ export async function statementRoutes(app: FastifyInstance) {
   app.get(
     '/statements/:participantId/:periodId',
     { preHandler: [app.authenticate] },
-    async (req: any, reply) => {
+    async (req: any, reply: any) => {
       const data = await svc.getParticipantStatement(
         req.tenantId,
         req.params.participantId,

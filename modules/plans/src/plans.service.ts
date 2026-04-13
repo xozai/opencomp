@@ -193,6 +193,16 @@ export class PlansService {
     return { plan: updatedPlan, version: publishedVersion }
   }
 
+  // ── Versions ──
+
+  async listVersions(tenantId: string, planId: string) {
+    return this.db
+      .select()
+      .from(planVersions)
+      .where(and(eq(planVersions.tenantId, tenantId), eq(planVersions.planId, planId)))
+      .orderBy(desc(planVersions.version))
+  }
+
   // ── Components ──
 
   async listComponents(tenantId: string, planVersionId: string) {

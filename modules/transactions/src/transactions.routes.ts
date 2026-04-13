@@ -12,14 +12,18 @@ export async function transactionRoutes(app: FastifyInstance) {
   })
 
   // GET /transactions
-  app.get('/transactions', { preHandler: [app.authenticate] }, async (request: any, reply) => {
-    const { status, source, participantId } = request.query as Record<string, string>
-    const data = await svc.listTransactions(request.tenantId, { status, source, participantId })
+  app.get('/transactions', { preHandler: [app.authenticate] }, async (request: any, reply: any) => {
+    const q = request.query as Record<string, string | undefined>
+    const data = await svc.listTransactions(request.tenantId, {
+      ...(q.status !== undefined && { status: q.status }),
+      ...(q.source !== undefined && { source: q.source }),
+      ...(q.participantId !== undefined && { participantId: q.participantId }),
+    })
     return reply.send({ success: true, data, total: data.length })
   })
 
   // GET /transactions/:id
-  app.get('/transactions/:id', { preHandler: [app.authenticate] }, async (request: any, reply) => {
+  app.get('/transactions/:id', { preHandler: [app.authenticate] }, async (request: any, reply: any) => {
     try {
       const data = await svc.getTransaction(request.tenantId, request.params.id)
       return reply.send({ success: true, data })
@@ -32,7 +36,7 @@ export async function transactionRoutes(app: FastifyInstance) {
   })
 
   // POST /transactions/ingest — single transaction
-  app.post('/transactions/ingest', { preHandler: [app.authenticate] }, async (request: any, reply) => {
+  app.post('/transactions/ingest', { preHandler: [app.authenticate] }, async (request: any, reply: any) => {
     const input = IngestTransactionSchema.parse(request.body)
     const data = await svc.ingest(request.tenantId, input, getCtx(request))
     const status = data.duplicate ? 200 : 201
@@ -40,14 +44,14 @@ export async function transactionRoutes(app: FastifyInstance) {
   })
 
   // POST /transactions/ingest/bulk
-  app.post('/transactions/ingest/bulk', { preHandler: [app.authenticate] }, async (request: any, reply) => {
+  app.post('/transactions/ingest/bulk', { preHandler: [app.authenticate] }, async (request: any, reply: any) => {
     const { source, transactions } = BulkIngestSchema.parse(request.body)
     const data = await svc.bulkIngest(request.tenantId, transactions, source, getCtx(request))
     return reply.status(207).send({ success: true, data })
   })
 
   // POST /transactions/:id/validate
-  app.post('/transactions/:id/validate', { preHandler: [app.authenticate] }, async (request: any, reply) => {
+  app.post('/transactions/:id/validate', { preHandler: [app.authenticate] }, async (request: any, reply: any) => {
     try {
       const data = await svc.validate(request.tenantId, request.params.id, getCtx(request))
       return reply.send({ success: true, data })
@@ -61,7 +65,7 @@ export async function transactionRoutes(app: FastifyInstance) {
   })
 
   // POST /transactions/validate-pending
-  app.post('/transactions/validate-pending', { preHandler: [app.authenticate] }, async (request: any, reply) => {
+  app.post('/transactions/validate-pending', { preHandler: [app.authenticate] }, async (request: any, reply: any) => {
     const data = await svc.validatePending(request.tenantId, getCtx(request))
     return reply.send({ success: true, data })
   })

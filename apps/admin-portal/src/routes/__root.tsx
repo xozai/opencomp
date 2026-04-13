@@ -14,7 +14,13 @@ const NAV = [
   { to: '/', label: 'Dashboard' },
   { to: '/plans', label: 'Plans' },
   { to: '/participants', label: 'Participants' },
+  { to: '/quotas', label: 'Quotas' },
   { to: '/calculations', label: 'Calculations' },
+  { to: '/adjustments', label: 'Adjustments' },
+  { to: '/reports', label: 'Reports' },
+  { to: '/goal-sheets', label: 'Goal Sheets' },
+  { to: '/periods', label: 'Periods' },
+  { to: '/transactions', label: 'Transactions' },
   { to: '/disputes', label: 'Disputes' },
   { to: '/approvals', label: 'Approvals' },
 ]

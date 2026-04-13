@@ -23,7 +23,7 @@ function LoginPage() {
     try {
       const res = await auth.login(email, password)
       setTokens(res.data.accessToken, res.data.refreshToken)
-      navigate({ to: '/' })
+      window.location.href = '/'
     } catch {
       setError('Invalid email or password.')
     } finally {

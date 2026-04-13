@@ -131,7 +131,7 @@ function ParticipantsPage() {
                   <td className="px-4 py-3">
                     {p.status === 'active' && (
                       <button
-                        onClick={() => terminateMut.mutate({ id: p.id, date: new Date().toISOString().split('T')[0] })}
+                        onClick={() => terminateMut.mutate({ id: p.id, date: new Date().toISOString().slice(0, 10) })}
                         className="text-xs text-red-500 hover:underline"
                       >
                         Terminate

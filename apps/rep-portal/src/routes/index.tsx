@@ -1,8 +1,11 @@
-import { createFileRoute, redirect } from '@tanstack/react-router'
+import { createRoute, redirect } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { getAccessToken, auth, goalSheetsApi } from '../lib/api'
+import { Route as rootRoute } from './__root'
 
-export const Route = createFileRoute('/')({
+export const Route = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/',
   beforeLoad: () => {
     if (!getAccessToken()) throw redirect({ to: '/login' })
   },
@@ -26,9 +29,12 @@ const STATUS_COLORS: Record<string, string> = {
 
 function GoalSheetsPage() {
   const meQuery = useQuery({ queryKey: ['me'], queryFn: () => auth.me() })
+  const participantId = meQuery.data?.data.participantId ?? ''
+
   const sheetsQuery = useQuery({
-    queryKey: ['goal-sheets'],
-    queryFn: () => goalSheetsApi.list(),
+    queryKey: ['goal-sheets', participantId],
+    queryFn: () => goalSheetsApi.list(participantId ? { participantId } : undefined),
+    enabled: !!participantId,
   })
 
   const me = meQuery.data?.data
