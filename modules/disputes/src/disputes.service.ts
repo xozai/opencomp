@@ -92,15 +92,15 @@ export class DisputesService {
     await this.audit.recordSafe({
       ctx,
       entityType: 'dispute',
-      entityId: dispute.id,
+      entityId: dispute!.id,
       action: 'opened',
-      after: { subject: dispute.subject, participantId: dispute.participantId },
+      after: { subject: dispute!.subject, participantId: dispute!.participantId },
     })
 
     await eventBus.publish(
       createEvent(DISPUTE_OPENED, tenantId, {
-        disputeId: dispute.id,
-        participantId: dispute.participantId,
+        disputeId: dispute!.id,
+        participantId: dispute!.participantId,
         openedById,
       }),
     )
@@ -112,7 +112,7 @@ export class DisputesService {
         tenantId,
         workflowType: 'dispute_resolution',
         entityType: 'dispute',
-        entityId: dispute.id,
+        entityId: dispute!.id,
         requestedById: openedById,
         status: 'pending',
       })
@@ -120,10 +120,10 @@ export class DisputesService {
 
     await eventBus.publish(
       createEvent(APPROVAL_REQUESTED, tenantId, {
-        approvalRequestId: approvalRequest.id,
+        approvalRequestId: approvalRequest!.id,
         workflowType: 'dispute_resolution',
         entityType: 'dispute',
-        entityId: dispute.id,
+        entityId: dispute!.id,
         requestedById: openedById,
       }),
     )
@@ -258,7 +258,7 @@ export class DisputesService {
       entityId: payoutId,
       action: 'adjustment_applied',
       before: { adjustedAmountCents: payout.adjustedAmountCents },
-      after: { adjustedAmountCents: newAdjustedAmount, adjustmentId: adjustment.id },
+      after: { adjustedAmountCents: newAdjustedAmount, adjustmentId: adjustment!.id },
     })
   }
 }

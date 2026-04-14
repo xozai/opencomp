@@ -65,8 +65,9 @@ const transactionAdapters = new Map<string, TransactionAdapterExtension>()
 const hrisAdapters = new Map<string, HrisAdapterExtension>()
 const tenantConfigs = new Map<string, IntegrationConfig[]>()
 
-export function registerTransactionAdapter(adapter: TransactionAdapterExtension) {
-  transactionAdapters.set(adapter.adapterId, adapter)
+export function registerTransactionAdapter(adapter: TransactionAdapterExtension & { adapterId?: string }) {
+  const id = adapter.adapterId ?? (adapter as { sourceId?: string }).sourceId ?? 'unknown'
+  transactionAdapters.set(id, adapter)
 }
 
 export function registerHrisAdapter(adapter: HrisAdapterExtension) {
@@ -121,7 +122,7 @@ export class IntegrationsService {
     const startedAt = new Date().toISOString()
     let count = 0
 
-    for await (const record of adapter.fetchTransactions(cfg.config, since)) {
+    for await (const record of (adapter as any).fetchTransactions(cfg.config, since)) {
       count++
       yield record
     }

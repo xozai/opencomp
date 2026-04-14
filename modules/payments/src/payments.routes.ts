@@ -32,7 +32,10 @@ export async function paymentRoutes(app: FastifyInstance) {
   // GET /payments?participantId=&periodId=
   app.get('/payments', { preHandler: [app.authenticate] }, async (request: any, reply: any) => {
     const { participantId, periodId } = request.query as { participantId?: string; periodId?: string }
-    const data = await svc.getPayments(request.tenantId, { participantId, periodId })
+    const data = await svc.getPayments(request.tenantId, {
+      ...(participantId !== undefined ? { participantId } : {}),
+      ...(periodId !== undefined ? { periodId } : {}),
+    })
     return reply.send({ success: true, data, total: data.length })
   })
 

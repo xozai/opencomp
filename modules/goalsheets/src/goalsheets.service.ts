@@ -101,12 +101,12 @@ export class GoalSheetsService {
       await this.audit.recordSafe({
         ctx,
         entityType: 'goalsheet',
-        entityId: gs.id,
+        entityId: gs!.id,
         action: 'generated',
-        after: gs,
+        ...(gs !== undefined ? { after: gs as Record<string, unknown> } : {}),
       })
 
-      created.push(gs)
+      if (gs) created.push(gs)
     }
 
     return { generated: created.length, skipped: participantList.length - created.length }
@@ -138,9 +138,9 @@ export class GoalSheetsService {
       await eventBus.publish(
         createEvent(GOAL_SHEET_DISTRIBUTED, tenantId, {
           goalSheetId: id,
-          participantId: updated.participantId,
-          planVersionId: updated.planVersionId,
-          periodId: updated.periodId,
+          participantId: updated!.participantId,
+          planVersionId: updated!.planVersionId,
+          periodId: updated!.periodId,
         }),
       )
 
@@ -181,7 +181,7 @@ export class GoalSheetsService {
     await eventBus.publish(
       createEvent(GOAL_SHEET_ACKNOWLEDGED, tenantId, {
         goalSheetId,
-        participantId: updated.participantId,
+        participantId: updated!.participantId,
         acknowledgedById,
       }),
     )

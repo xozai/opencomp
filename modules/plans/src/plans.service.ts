@@ -65,7 +65,16 @@ export class PlansService {
     const data = CreatePlanSchema.parse(input)
     const [plan] = await this.db
       .insert(plans)
-      .values({ tenantId, ...data, status: 'draft', metadata: {} })
+      .values({
+        tenantId,
+        name: data.name,
+        effectiveFrom: data.effectiveFrom,
+        currency: data.currency,
+        status: 'draft',
+        metadata: {},
+        ...(data.description !== undefined ? { description: data.description } : {}),
+        ...(data.effectiveTo !== undefined ? { effectiveTo: data.effectiveTo } : {}),
+      })
       .returning()
 
     // Create initial version
@@ -73,7 +82,7 @@ export class PlansService {
       .insert(planVersions)
       .values({
         tenantId,
-        planId: plan.id,
+        planId: plan!.id,
         version: 1,
         status: 'draft',
         definition: {},
@@ -83,9 +92,9 @@ export class PlansService {
     await this.audit.recordSafe({
       ctx,
       entityType: 'plan',
-      entityId: plan.id,
+      entityId: plan!.id,
       action: 'created',
-      after: plan,
+      ...(plan !== undefined ? { after: plan as Record<string, unknown> } : {}),
     })
 
     return { plan, version }
@@ -100,7 +109,14 @@ export class PlansService {
     const data = UpdatePlanSchema.parse(input)
     const [updated] = await this.db
       .update(plans)
-      .set({ ...data, updatedAt: new Date() })
+      .set({
+        updatedAt: new Date(),
+        ...(data.name !== undefined ? { name: data.name } : {}),
+        ...(data.description !== undefined ? { description: data.description } : {}),
+        ...(data.effectiveFrom !== undefined ? { effectiveFrom: data.effectiveFrom } : {}),
+        ...(data.effectiveTo !== undefined ? { effectiveTo: data.effectiveTo } : {}),
+        ...(data.currency !== undefined ? { currency: data.currency } : {}),
+      })
       .where(and(eq(plans.tenantId, tenantId), eq(plans.id, planId)))
       .returning()
 
@@ -109,8 +125,8 @@ export class PlansService {
       entityType: 'plan',
       entityId: planId,
       action: 'updated',
-      before: existing,
-      after: updated,
+      before: existing as Record<string, unknown>,
+      ...(updated !== undefined ? { after: updated as Record<string, unknown> } : {}),
     })
 
     return updated
@@ -185,7 +201,7 @@ export class PlansService {
     await eventBus.publish(
       createEvent(PLAN_PUBLISHED, tenantId, {
         planId,
-        planVersionId: publishedVersion.id,
+        planVersionId: publishedVersion!.id,
         publishedById: ctx.actorId ?? 'system',
       }),
     )
@@ -222,15 +238,24 @@ export class PlansService {
     const data = CreateComponentSchema.parse(input)
     const [component] = await this.db
       .insert(components)
-      .values({ tenantId, planVersionId, ...data })
+      .values({
+        tenantId,
+        planVersionId,
+        name: data.name,
+        type: data.type,
+        config: data.config,
+        sortOrder: data.sortOrder,
+        ...(data.measureType !== undefined ? { measureType: data.measureType } : {}),
+        ...(data.formulaId !== undefined ? { formulaId: data.formulaId } : {}),
+      })
       .returning()
 
     await this.audit.recordSafe({
       ctx,
       entityType: 'component',
-      entityId: component.id,
+      entityId: component!.id,
       action: 'created',
-      after: component,
+      ...(component !== undefined ? { after: component as Record<string, unknown> } : {}),
     })
 
     return component

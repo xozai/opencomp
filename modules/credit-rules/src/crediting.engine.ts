@@ -171,7 +171,7 @@ export class CreditingEngine {
 
                 if (parentRels.length === 0) break
 
-                const parentRel = parentRels[0]
+                const parentRel = parentRels[0]!
                 // Create credit for parent position's component
                 // Note: In practice, parent position's participant would be looked up
                 // For now, record the inheritance

@@ -33,7 +33,7 @@ class WorkflowEngine {
     name: string,
     definition: MachineDefinition<S, E>,
   ): MachineDefinition<S, E> {
-    this.machines.set(name, definition as MachineDefinition<string, string>)
+    this.machines.set(name, definition as unknown as MachineDefinition<string, string>)
     return definition
   }
 

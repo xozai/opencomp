@@ -31,7 +31,7 @@ export interface PayoutSummaryRow {
 export interface RunSummaryRow {
   runId: string
   periodId: string
-  planVersionId: string
+  planVersionId: string | null
   status: string
   participantCount: number | null
   errorCount: number | null

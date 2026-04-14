@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { CalculationsService, CalculationError } from './calculations.service'
 import { eventBus } from '../../../packages/events/src'

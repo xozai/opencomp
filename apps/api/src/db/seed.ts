@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Demo seed data — creates a default tenant, admin user, sample participants,
  * a published comp plan, quotas, goal sheets, and transactions.

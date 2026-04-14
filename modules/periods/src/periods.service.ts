@@ -53,9 +53,9 @@ export class PeriodsService {
     await this.audit.recordSafe({
       ctx,
       entityType: 'period',
-      entityId: created.id,
+      entityId: created!.id,
       action: 'created',
-      after: created,
+      ...(created !== undefined ? { after: created as Record<string, unknown> } : {}),
     })
 
     return created

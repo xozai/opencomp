@@ -120,25 +120,29 @@ export class ParticipantsService {
       .insert(participants)
       .values({
         tenantId,
-        ...data,
+        firstName: data.firstName,
+        lastName: data.lastName,
         email: data.email.toLowerCase(),
         status: 'active',
         metadata: data.metadata ?? {},
+        ...(data.employeeId !== undefined ? { employeeId: data.employeeId } : {}),
+        ...(data.title !== undefined ? { title: data.title } : {}),
+        ...(data.hireDate !== undefined ? { hireDate: data.hireDate } : {}),
       })
       .returning()
 
     await this.audit.recordSafe({
       ctx,
       entityType: 'participant',
-      entityId: participant.id,
+      entityId: participant!.id,
       action: 'created',
-      after: { firstName: participant.firstName, lastName: participant.lastName, email: participant.email },
+      after: { firstName: participant!.firstName, lastName: participant!.lastName, email: participant!.email },
     })
 
     await eventBus.publish(
       createEvent('participant.created', tenantId, {
-        participantId: participant.id,
-        email: participant.email,
+        participantId: participant!.id,
+        email: participant!.email,
       }),
     )
 
@@ -151,7 +155,18 @@ export class ParticipantsService {
 
     const [updated] = await this.db
       .update(participants)
-      .set({ ...data, updatedAt: new Date() })
+      .set({
+        updatedAt: new Date(),
+        ...(data.email !== undefined ? { email: data.email } : {}),
+        ...(data.firstName !== undefined ? { firstName: data.firstName } : {}),
+        ...(data.lastName !== undefined ? { lastName: data.lastName } : {}),
+        ...(data.employeeId !== undefined ? { employeeId: data.employeeId } : {}),
+        ...(data.title !== undefined ? { title: data.title } : {}),
+        ...(data.status !== undefined ? { status: data.status } : {}),
+        ...(data.hireDate !== undefined ? { hireDate: data.hireDate } : {}),
+        ...(data.terminationDate !== undefined ? { terminationDate: data.terminationDate } : {}),
+        ...(data.metadata !== undefined ? { metadata: data.metadata } : {}),
+      })
       .where(and(eq(participants.tenantId, tenantId), eq(participants.id, participantId)))
       .returning()
 
@@ -160,8 +175,8 @@ export class ParticipantsService {
       entityType: 'participant',
       entityId: participantId,
       action: 'updated',
-      before: existing,
-      after: updated,
+      before: existing as Record<string, unknown>,
+      ...(updated !== undefined ? { after: updated as Record<string, unknown> } : {}),
     })
 
     return updated

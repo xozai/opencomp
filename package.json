@@ -28,19 +28,32 @@
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.1",
+    "@types/bcryptjs": "^2.4.6",
     "@typescript-eslint/eslint-plugin": "^7.0.0",
     "@typescript-eslint/parser": "^7.0.0",
+    "bcryptjs": "^2.4.3",
+    "drizzle-orm": "^0.30.0",
     "eslint": "^9.0.0",
     "eslint-config-prettier": "^9.1.0",
+    "fastify": "^4.27.0",
     "prettier": "^3.2.5",
     "turbo": "^2.0.0",
     "typescript": "^5.4.0",
-    "vitest": "^1.4.0"
+    "vitest": "^1.4.0",
+    "zod": "^3.23.8"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/opencomp/opencomp.git"
   },
-  "keywords": ["sales-compensation", "compensation-management", "open-source", "hr-tech"],
-  "homepage": "https://opencomp.dev"
+  "keywords": [
+    "sales-compensation",
+    "compensation-management",
+    "open-source",
+    "hr-tech"
+  ],
+  "homepage": "https://opencomp.dev",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.52.0"
+  }
 }

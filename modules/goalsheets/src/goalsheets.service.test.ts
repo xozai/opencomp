@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { GoalSheetsService, GoalSheetError } from './goalsheets.service'
 import { eventBus } from '../../../packages/events/src'

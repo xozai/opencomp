@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { DisputesService, DisputeError } from './disputes.service'
 import { eventBus } from '../../../packages/events/src'

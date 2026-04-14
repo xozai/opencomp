@@ -2,7 +2,7 @@
  * platform-events — re-exports the internal event bus and domain event constants.
  * Use this module within the monorepo; external plugins should use @opencomp/sdk.
  */
-export { eventBus, EventBus } from '../../../packages/events/src/bus'
+export { eventBus } from '../../../packages/events/src/bus'
 export {
   createEvent,
   PLAN_PUBLISHED,

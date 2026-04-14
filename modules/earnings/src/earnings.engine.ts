@@ -163,7 +163,7 @@ export class EarningsEngine {
           }
 
           case 'tiered': {
-            const config = formulaConfig as TieredConfig
+            const config = formulaConfig as unknown as TieredConfig
             let remaining = measuredValue
             let totalEarnings = 0
             const tierBreakdown: unknown[] = []
@@ -189,7 +189,7 @@ export class EarningsEngine {
           }
 
           case 'accelerated': {
-            const config = formulaConfig as AcceleratedConfig
+            const config = formulaConfig as unknown as AcceleratedConfig
             let multiplier = 1
 
             const sortedAccelerators = [...(config.accelerators ?? [])].sort(
@@ -212,7 +212,7 @@ export class EarningsEngine {
           }
 
           case 'mbo': {
-            const config = formulaConfig as MboConfig
+            const config = formulaConfig as unknown as MboConfig
             const allGatesPassed = (config.gates ?? []).every((gate) => {
               // Simplified: compare attainment against gate threshold
               return attainmentPct >= gate.thresholdPct
@@ -226,7 +226,7 @@ export class EarningsEngine {
           }
 
           case 'draw': {
-            const config = formulaConfig as DrawConfig
+            const config = formulaConfig as unknown as DrawConfig
             const baseEarnings = Math.round(measuredValue * (config.rate ?? 0))
             grossEarningsCents = Math.max(0, baseEarnings - (config.drawAmountCents ?? 0))
             formulaBreakdown.type = 'draw'
@@ -236,7 +236,7 @@ export class EarningsEngine {
           }
 
           case 'guarantee': {
-            const config = formulaConfig as GuaranteeConfig
+            const config = formulaConfig as unknown as GuaranteeConfig
             const baseEarnings = Math.round(measuredValue * (config.rate ?? 0))
             grossEarningsCents = Math.max(config.guaranteedAmountCents ?? 0, baseEarnings)
             formulaBreakdown.type = 'guarantee'

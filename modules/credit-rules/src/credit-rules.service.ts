@@ -115,7 +115,7 @@ export class CreditRulesService {
       await this.db.insert(creditRuleConditions).values(
         data.conditions.map((c) => ({
           tenantId,
-          creditRuleId: rule.id,
+          creditRuleId: rule!.id,
           field: c.field,
           operator: c.operator,
           value: c.value,
@@ -128,7 +128,7 @@ export class CreditRulesService {
       await this.db.insert(creditRuleActions).values(
         data.actions.map((a) => ({
           tenantId,
-          creditRuleId: rule.id,
+          creditRuleId: rule!.id,
           actionType: a.actionType,
           targetType: a.targetType,
           targetValue: a.targetValue,

@@ -7,22 +7,38 @@ settings:
 importers:
 
   .:
+    dependencies:
+      '@anthropic-ai/sdk':
+        specifier: ^0.52.0
+        version: 0.52.0
     devDependencies:
       '@changesets/cli':
         specifier: ^2.27.1
         version: 2.30.0(@types/node@24.12.0)
+      '@types/bcryptjs':
+        specifier: ^2.4.6
+        version: 2.4.6
       '@typescript-eslint/eslint-plugin':
         specifier: ^7.0.0
         version: 7.18.0(@typescript-eslint/parser@7.18.0(eslint@9.39.4(jiti@1.21.7))(typescript@5.9.3))(eslint@9.39.4(jiti@1.21.7))(typescript@5.9.3)
       '@typescript-eslint/parser':
         specifier: ^7.0.0
         version: 7.18.0(eslint@9.39.4(jiti@1.21.7))(typescript@5.9.3)
+      bcryptjs:
+        specifier: ^2.4.3
+        version: 2.4.3
+      drizzle-orm:
+        specifier: ^0.30.0
+        version: 0.30.10(@types/pg@8.20.0)(@types/react@18.3.28)(pg@8.20.0)(react@18.3.1)
       eslint:
         specifier: ^9.0.0
         version: 9.39.4(jiti@1.21.7)
       eslint-config-prettier:
         specifier: ^9.1.0
         version: 9.1.2(eslint@9.39.4(jiti@1.21.7))
+      fastify:
+        specifier: ^4.27.0
+        version: 4.29.1
       prettier:
         specifier: ^3.2.5
         version: 3.8.1
@@ -35,6 +51,9 @@ importers:
       vitest:
         specifier: ^1.4.0
         version: 1.6.1(@types/node@24.12.0)
+      zod:
+        specifier: ^3.23.8
+        version: 3.25.76
 
   apps/admin-portal:
     dependencies:
@@ -114,6 +133,9 @@ importers:
       '@opencomp/events':
         specifier: workspace:*
         version: link:../../packages/events
+      '@opencomp/nl-rules':
+        specifier: workspace:*
+        version: link:../../packages/nl-rules
       dotenv:
         specifier: ^16.4.5
         version: 16.6.1
@@ -950,6 +972,12 @@ importers:
         specifier: ^1.4.0
         version: 1.6.1(@types/node@24.12.0)
 
+  packages/nl-rules:
+    dependencies:
+      '@anthropic-ai/sdk':
+        specifier: ^0.52.0
+        version: 0.52.0
+
   packages/sdk:
     dependencies:
       '@opencomp/contracts':
@@ -1119,6 +1147,10 @@ packages:
   '@alloc/quick-lru@5.2.0':
     resolution: {integrity: sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw==}
     engines: {node: '>=10'}
+
+  '@anthropic-ai/sdk@0.52.0':
+    resolution: {integrity: sha512-d4c+fg+xy9e46c8+YnrrgIQR45CZlAi7PwdzIfDXDM6ACxEZli1/fxhURsq30ZpMZy6LvSkr41jGq5aF5TD7rQ==}
+    hasBin: true
 
   '@astrojs/compiler@2.13.1':
     resolution: {integrity: sha512-f3FN83d2G/v32ipNClRKgYv30onQlMZX1vCeZMjPsMMPl1mDpmbl0+N5BYo4S/ofzqJyS5hvwacEo0CCVDn/Qg==}
@@ -6476,6 +6508,8 @@ packages:
 snapshots:
 
   '@alloc/quick-lru@5.2.0': {}
+
+  '@anthropic-ai/sdk@0.52.0': {}
 
   '@astrojs/compiler@2.13.1': {}
 

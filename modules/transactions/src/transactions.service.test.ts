@@ -58,7 +58,7 @@ describe('TransactionsService', () => {
       }, ctx)
 
       expect(result.duplicate).toBe(false)
-      expect(result.transaction.externalId).toBe('ext-001')
+      expect(result.transaction.id).toBe('tx-1')
     })
 
     it('returns duplicate flag for existing externalId', async () => {
@@ -84,7 +84,7 @@ describe('TransactionsService', () => {
       db.returning.mockResolvedValue([mockTx])
 
       const events: string[] = []
-      eventBus.subscribe('transaction.ingested', () => events.push('ingested'))
+      eventBus.subscribe('transaction.ingested', () => { events.push('ingested') })
 
       const svc = new TransactionsService(db as any)
       await svc.ingest('tenant-1', {

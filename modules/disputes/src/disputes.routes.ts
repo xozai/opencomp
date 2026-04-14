@@ -13,8 +13,12 @@ export async function disputeRoutes(app: FastifyInstance) {
 
   // GET /disputes
   app.get('/disputes', { preHandler: [app.authenticate] }, async (request: any, reply) => {
-    const { status, participantId, assignedToId } = request.query as Record<string, string>
-    const data = await svc.listDisputes(request.tenantId, { status, participantId, assignedToId })
+    const { status, participantId, assignedToId } = request.query as Record<string, string | undefined>
+    const data = await svc.listDisputes(request.tenantId, {
+      ...(status !== undefined ? { status } : {}),
+      ...(participantId !== undefined ? { participantId } : {}),
+      ...(assignedToId !== undefined ? { assignedToId } : {}),
+    })
     return reply.send({ success: true, data, total: data.length })
   })
 

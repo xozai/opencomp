@@ -13,8 +13,10 @@ function getJwtSecret(): string {
   return secret
 }
 
-const ACCESS_TOKEN_TTL = process.env.JWT_EXPIRES_IN ?? '15m'
-const REFRESH_TOKEN_TTL = process.env.JWT_REFRESH_EXPIRES_IN ?? '7d'
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const ACCESS_TOKEN_TTL = (process.env.JWT_EXPIRES_IN ?? '15m') as any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const REFRESH_TOKEN_TTL = (process.env.JWT_REFRESH_EXPIRES_IN ?? '7d') as any
 
 // ─── Schemas ──────────────────────────────────────────────────────────────────
 
@@ -91,7 +93,7 @@ export class AuthService {
       tenantId: user.tenantId,
       email: user.email,
       role: user.role,
-      participantId,
+      ...(participantId !== undefined ? { participantId } : {}),
     })
   }
 

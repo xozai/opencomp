@@ -8,21 +8,25 @@ export async function quotaRoutes(app: FastifyInstance) {
   app.get('/quotas', {
     preHandler: [app.authenticate],
     schema: { tags: ['Quotas'], security: [{ bearerAuth: [] }] },
-  }, async (request, reply) => {
+  }, async (request: any, reply: any) => {
     const { periodId, participantId } = z.object({
       periodId: z.string().uuid().optional(),
       participantId: z.string().uuid().optional(),
     }).parse(request.query)
-    const data = await svc.listQuotas(request.tenantId, { periodId, participantId })
+    const filters = {
+      ...(periodId !== undefined ? { periodId } : {}),
+      ...(participantId !== undefined ? { participantId } : {}),
+    }
+    const data = await svc.listQuotas(request.tenantId, filters)
     return reply.send({ success: true, data })
   })
 
   app.post('/quotas/bulk', {
     preHandler: [app.authenticate],
     schema: { tags: ['Quotas'], security: [{ bearerAuth: [] }] },
-  }, async (request, reply) => {
+  }, async (request: any, reply: any) => {
     const inputs = BulkUpsertQuotaSchema.parse(request.body)
-    const ctx = { actorId: request.user.sub, actorType: 'user' as const }
+    const ctx = { tenantId: request.tenantId, actorId: request.user.sub, actorType: 'user' as const }
     const data = await svc.bulkUpsert(request.tenantId, inputs, ctx)
     return reply.send({ success: true, data })
   })

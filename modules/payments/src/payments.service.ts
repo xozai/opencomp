@@ -132,7 +132,7 @@ export class PaymentsService {
       await this.audit.recordSafe({
         ctx,
         entityType: 'payment_statement',
-        entityId: statement.id,
+        entityId: statement!.id,
         action: 'generated',
         after: { participantId, totalEarningsCents },
       })

@@ -7,7 +7,9 @@ export async function positionRoutes(app: FastifyInstance) {
   // GET /positions
   app.get('/positions', { preHandler: [app.authenticate] }, async (request: any, reply: any) => {
     const { type } = request.query as { type?: string }
-    const data = await svc.listPositions(request.tenantId, { type })
+    const data = await svc.listPositions(request.tenantId, {
+      ...(type !== undefined ? { type } : {}),
+    })
     return reply.send({ success: true, data, total: data.length })
   })
 

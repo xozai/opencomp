@@ -13,8 +13,12 @@ export async function goalSheetRoutes(app: FastifyInstance) {
 
   // GET /goal-sheets
   app.get('/goal-sheets', { preHandler: [app.authenticate] }, async (request: any, reply) => {
-    const { periodId, participantId, status } = request.query as Record<string, string>
-    const data = await svc.listGoalSheets(request.tenantId, { periodId, participantId, status })
+    const { periodId, participantId, status } = request.query as Record<string, string | undefined>
+    const data = await svc.listGoalSheets(request.tenantId, {
+      ...(periodId !== undefined ? { periodId } : {}),
+      ...(participantId !== undefined ? { participantId } : {}),
+      ...(status !== undefined ? { status } : {}),
+    })
     return reply.send({ success: true, data })
   })
 

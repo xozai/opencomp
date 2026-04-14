@@ -129,7 +129,7 @@ export function makeMockEventBus() {
   return {
     published,
     async publish(event: { type: string; tenantId: string; payload: unknown }) {
-      published.published.push(event)
+      published.push(event)
     },
     subscribe: () => {},
     reset() {

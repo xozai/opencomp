@@ -149,7 +149,7 @@ export class FilesService {
     const ext = originalName.split('.').pop() ?? 'bin'
     const key = `${tenantId}/${category}/${randomUUID()}.${ext}`
 
-    await this.driver.put(key, stream, { mimeType, sizeBytes })
+    await this.driver.put(key, stream, { mimeType, ...(sizeBytes !== undefined ? { sizeBytes } : {}) })
 
     return {
       key,

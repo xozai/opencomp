@@ -80,7 +80,8 @@ Respond ONLY with valid JSON in this exact format:
     messages: [{ role: 'user', content: `Parse this ${ruleType} rule: ${ruleText}` }],
   })
 
-  const text = response.content[0].type === 'text' ? response.content[0].text : ''
+  const firstBlock = response.content[0] as { type?: string; text?: string } | undefined
+  const text = firstBlock?.type === 'text' ? (firstBlock.text ?? '') : ''
 
   try {
     const jsonMatch = text.match(/\{[\s\S]*\}/)

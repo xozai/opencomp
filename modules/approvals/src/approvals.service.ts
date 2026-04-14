@@ -83,9 +83,9 @@ export class ApprovalsService {
     await this.audit.recordSafe({
       ctx,
       entityType: 'approval_request',
-      entityId: request.id,
+      entityId: request!.id,
       action: 'created',
-      after: { workflowType: request.workflowType, entityId: request.entityId },
+      after: { workflowType: request!.workflowType, entityId: request!.entityId },
     })
 
     return request

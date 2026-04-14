@@ -15,12 +15,12 @@ export async function periodRoutes(app: FastifyInstance) {
   app.post('/periods', {
     preHandler: [app.authenticate],
     schema: { tags: ['Periods'], security: [{ bearerAuth: [] }] },
-  }, async (request, reply) => {
-    if (request.user.role !== 'admin') {
+  }, async (request: any, reply) => {
+    if (request.user?.role !== 'admin') {
       return reply.status(403).send({ success: false, error: { code: 'FORBIDDEN', message: 'Admin only' } })
     }
     const input = CreatePeriodSchema.parse(request.body)
-    const ctx = { actorId: request.user.sub, actorType: 'user' as const }
+    const ctx = { tenantId: request.tenantId, actorId: request.user?.sub, actorType: 'user' as const }
     try {
       const data = await svc.create(request.tenantId, input, ctx)
       return reply.status(201).send({ success: true, data })
@@ -35,11 +35,11 @@ export async function periodRoutes(app: FastifyInstance) {
   app.post('/periods/:id/close', {
     preHandler: [app.authenticate],
     schema: { tags: ['Periods'], security: [{ bearerAuth: [] }] },
-  }, async (request, reply) => {
-    if (request.user.role !== 'admin') {
+  }, async (request: any, reply) => {
+    if (request.user?.role !== 'admin') {
       return reply.status(403).send({ success: false, error: { code: 'FORBIDDEN', message: 'Admin only' } })
     }
-    const ctx = { actorId: request.user.sub, actorType: 'user' as const }
+    const ctx = { tenantId: request.tenantId, actorId: request.user?.sub, actorType: 'user' as const }
     try {
       const data = await svc.close(request.tenantId, (request.params as any).id, ctx)
       return reply.send({ success: true, data })

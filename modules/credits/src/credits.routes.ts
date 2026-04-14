@@ -8,24 +8,27 @@ export async function creditRoutes(app: FastifyInstance) {
   app.get('/credits', {
     preHandler: [app.authenticate],
     schema: { tags: ['Credits'], security: [{ bearerAuth: [] }] },
-  }, async (request, reply) => {
+  }, async (request: any, reply) => {
     const { periodId, participantId } = z.object({
       periodId: z.string().uuid().optional(),
       participantId: z.string().uuid().optional(),
     }).parse(request.query)
-    const data = await svc.listCredits(request.tenantId, { periodId, participantId })
+    const data = await svc.listCredits(request.tenantId, {
+      ...(periodId !== undefined ? { periodId } : {}),
+      ...(participantId !== undefined ? { participantId } : {}),
+    })
     return reply.send({ success: true, data })
   })
 
   app.post('/credits/period', {
     preHandler: [app.authenticate],
     schema: { tags: ['Credits'], security: [{ bearerAuth: [] }] },
-  }, async (request, reply) => {
+  }, async (request: any, reply) => {
     const { periodId, planVersionId } = z.object({
       periodId: z.string().uuid(),
       planVersionId: z.string().uuid(),
     }).parse(request.body)
-    const ctx = { actorId: request.user.sub, actorType: 'user' as const }
+    const ctx = { tenantId: request.tenantId, actorId: request.user?.sub, actorType: 'user' as const }
     const data = await svc.creditPeriod(request.tenantId, periodId, planVersionId, ctx)
     return reply.send({ success: true, data })
   })

@@ -13,7 +13,10 @@ export async function adjustmentRoutes(app: FastifyInstance) {
   // GET /adjustments?payoutId=&participantId=
   app.get('/adjustments', { preHandler: [app.authenticate] }, async (req: any, reply) => {
     const { payoutId, participantId } = req.query as Record<string, string | undefined>
-    const data = await svc.list(req.tenantId, { payoutId, participantId })
+    const data = await svc.list(req.tenantId, {
+      ...(payoutId !== undefined ? { payoutId } : {}),
+      ...(participantId !== undefined ? { participantId } : {}),
+    })
     return reply.send({ success: true, data })
   })
 

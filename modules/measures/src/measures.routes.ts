@@ -39,7 +39,11 @@ export async function measureRoutes(app: FastifyInstance) {
       participantId?: string
       componentId?: string
     }
-    const data = await svc.listResults(request.tenantId, { calculationRunId, participantId, componentId })
+    const data = await svc.listResults(request.tenantId, {
+      ...(calculationRunId !== undefined ? { calculationRunId } : {}),
+      ...(participantId !== undefined ? { participantId } : {}),
+      ...(componentId !== undefined ? { componentId } : {}),
+    })
     return reply.send({ success: true, data, total: data.length })
   })
 }

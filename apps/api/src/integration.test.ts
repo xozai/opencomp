@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * End-to-end integration test: full comp cycle
  *

@@ -17,9 +17,13 @@ export async function approvalRoutes(app: FastifyInstance) {
   })
 
   // GET /approvals
-  app.get('/approvals', { preHandler: [app.authenticate] }, async (req: any, reply) => {
-    const { status, workflowType, assignedToId } = req.query as Record<string, string>
-    const data = await svc.list(req.tenantId, { status, workflowType, assignedToId })
+  app.get('/approvals', { preHandler: [app.authenticate] }, async (req: any, reply: any) => {
+    const { status, workflowType, assignedToId } = req.query as Record<string, string | undefined>
+    const data = await svc.list(req.tenantId, {
+      ...(status !== undefined ? { status } : {}),
+      ...(workflowType !== undefined ? { workflowType } : {}),
+      ...(assignedToId !== undefined ? { assignedToId } : {}),
+    })
     return reply.send({ success: true, data, total: data.length })
   })
 

@@ -114,7 +114,7 @@ export class CalculationsService {
       .returning()
 
     await eventBus.publish(
-      createEvent(CALCULATION_RUN_STARTED, tenantId, { calculationRunId: run.id, periodId: input.periodId }),
+      createEvent(CALCULATION_RUN_STARTED, tenantId, { calculationRunId: run!.id, periodId: input.periodId }),
     )
 
     try {
@@ -147,7 +147,7 @@ export class CalculationsService {
           await this.calculateParticipant(
             tenantId,
             participant.id,
-            run.id,
+            run!.id,
             input.periodId,
             input.planVersionId,
             planComponents,
@@ -168,33 +168,33 @@ export class CalculationsService {
         tenantId,
         input.periodId,
         input.planVersionId,
-        run.id,
+        run!.id,
       )
 
       const measureResult = await this.measurementEngine.applyMeasures(
         tenantId,
-        run.id,
+        run!.id,
         input.periodId,
         input.planVersionId,
       )
 
       const earningsResult = await this.earningsEngine.applyEarnings(
         tenantId,
-        run.id,
+        run!.id,
         input.periodId,
         input.planVersionId,
       )
 
       const paymentsResult = await this.paymentsService.calculatePayments(
         tenantId,
-        run.id,
+        run!.id,
         input.periodId,
         input.planVersionId,
         ctx,
       )
 
       // ── Exception detection ──
-      const exceptionsRaised = await this.detectExceptions(tenantId, run.id, input.periodId)
+      const exceptionsRaised = await this.detectExceptions(tenantId, run!.id, input.periodId)
 
       const summary = {
         creditsApplied: creditResult.creditsApplied,
@@ -215,17 +215,17 @@ export class CalculationsService {
           config: { ...{}, summary },
           updatedAt: new Date(),
         })
-        .where(eq(calculationRuns.id, run.id))
+        .where(eq(calculationRuns.id, run!.id))
         .returning()
 
       await eventBus.publish(
-        createEvent(CALCULATION_RUN_COMPLETED, tenantId, { calculationRunId: run.id, periodId: input.periodId }),
+        createEvent(CALCULATION_RUN_COMPLETED, tenantId, { calculationRunId: run!.id, periodId: input.periodId }),
       )
 
       await this.audit.recordSafe({
         ctx,
         entityType: 'calculation_run',
-        entityId: run.id,
+        entityId: run!.id,
         action: 'completed',
         after: { participantCount: successCount, errorCount, summary },
       })
@@ -236,10 +236,10 @@ export class CalculationsService {
       await this.db
         .update(calculationRuns)
         .set({ status: 'failed', completedAt: new Date(), updatedAt: new Date() })
-        .where(eq(calculationRuns.id, run.id))
+        .where(eq(calculationRuns.id, run!.id))
 
       await eventBus.publish(
-        createEvent(CALCULATION_RUN_FAILED, tenantId, { calculationRunId: run.id, periodId: input.periodId }),
+        createEvent(CALCULATION_RUN_FAILED, tenantId, { calculationRunId: run!.id, periodId: input.periodId }),
       )
 
       throw err
@@ -346,7 +346,7 @@ export class CalculationsService {
     await this.audit.recordSafe({
       ctx,
       entityType: 'payout',
-      entityId: payout.id,
+      entityId: payout!.id,
       action: 'calculated',
       after: {
         participantId,

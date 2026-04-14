@@ -81,7 +81,7 @@ export class QuotasService {
 
     const createdRows = await this.db
       .insert(quotas)
-      .values({ tenantId, ...data })
+      .values({ tenantId, ...data, notes: data.notes ?? null })
       .returning()
     const created = createdRows[0]!
 

@@ -285,14 +285,18 @@ export const adjustments = pgTable('adjustments', {
   id: uuid('id').primaryKey().defaultRandom(),
   tenantId: tenantId(),
   payoutId: uuid('payout_id').notNull().references(() => payouts.id),
+  participantId: uuid('participant_id').references(() => participants.id),
+  periodId: uuid('period_id').references(() => periods.id),
   disputeId: uuid('dispute_id').references(() => disputes.id),
   approvalRequestId: uuid('approval_request_id').references(() => approvalRequests.id),
   type: text('type').notNull(), // AdjustmentType
+  category: text('category').notNull().default('correction'), // 'correction'|'clawback'|'bonus'|'other'
   amountCents: integer('amount_cents').notNull(),
   currency: text('currency').notNull().default('USD'),
   reason: text('reason').notNull(),
   appliedById: uuid('applied_by_id').notNull().references(() => users.id),
   appliedAt: timestamp('applied_at', { withTimezone: true }).notNull(),
+  createdById: uuid('created_by_id').references(() => users.id),
   createdAt: now(),
   updatedAt: updatedAt(),
 })

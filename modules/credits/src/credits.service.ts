@@ -136,7 +136,7 @@ export class CreditsService {
     await this.audit.recordSafe({
       ctx,
       entityType: 'credit',
-      entityId: credit.id,
+      entityId: credit!.id,
       action: 'applied',
       after: {
         transactionId: data.transactionId,
@@ -148,7 +148,7 @@ export class CreditsService {
     })
 
     return {
-      creditId: credit.id,
+      creditId: credit!.id,
       participantId,
       componentId: data.componentId,
       amountCents,

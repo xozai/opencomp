@@ -129,7 +129,7 @@ export class PositionsService {
         ),
       )
 
-    return { position, parent, children }
+    return { position, ...(parent !== undefined ? { parent } : {}), children }
   }
 
   async createRelationship(tenantId: string, input: CreateRelationshipInput) {

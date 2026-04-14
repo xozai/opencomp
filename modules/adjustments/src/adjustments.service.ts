@@ -29,8 +29,8 @@ export interface AdjustmentRecord {
   id: string
   tenantId: string
   payoutId: string
-  participantId: string
-  periodId: string
+  participantId: string | null
+  periodId: string | null
   amountCents: number
   currency: string
   reason: string
@@ -86,7 +86,10 @@ export class AdjustmentsService {
         currency: data.currency,
         reason: data.reason,
         category: data.category,
-        createdById: ctx.actorId,
+        type: data.category,
+        createdById: ctx.actorId ?? null,
+        appliedById: ctx.actorId ?? 'system',
+        appliedAt: new Date(),
         createdAt: new Date(),
         updatedAt: new Date(),
       })
@@ -122,14 +125,14 @@ export class AdjustmentsService {
     return {
       id,
       tenantId,
-      payoutId: created.payoutId,
-      participantId: created.participantId,
-      periodId: created.periodId,
-      amountCents: created.amountCents,
-      currency: created.currency,
-      reason: created.reason,
-      category: created.category,
-      createdById: created.createdById ?? ctx.actorId,
+      payoutId: created!.payoutId,
+      participantId: created!.participantId ?? data.participantId,
+      periodId: created!.periodId ?? data.periodId,
+      amountCents: created!.amountCents,
+      currency: created!.currency,
+      reason: created!.reason,
+      category: created!.category,
+      createdById: created!.createdById ?? ctx.actorId ?? '',
       createdAt: now,
     }
   }

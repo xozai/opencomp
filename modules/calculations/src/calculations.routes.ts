@@ -35,11 +35,16 @@ export async function calculationRoutes(app: FastifyInstance) {
 
   // POST /calculation-runs — start a new run
   app.post('/calculation-runs', { preHandler: [app.authenticate] }, async (request: any, reply) => {
-    const input = z.object({
+    const parsed = z.object({
       periodId: z.string().uuid(),
       planVersionId: z.string().uuid(),
       participantIds: z.array(z.string().uuid()).optional(),
     }).parse(request.body)
+    const input = {
+      periodId: parsed.periodId,
+      planVersionId: parsed.planVersionId,
+      ...(parsed.participantIds !== undefined ? { participantIds: parsed.participantIds } : {}),
+    }
 
     try {
       const data = await svc.executeRun(request.tenantId, input, getCtx(request))
