@@ -31,6 +31,7 @@ import { paymentRoutes } from '../../../modules/payments/src/payments.routes'
 import { nlRulesRoutes } from '../../../modules/nl-rules/src/nl-rules.routes'
 import { exchangeRateRoutes } from '../../../modules/exchange-rates/src/exchange-rates.routes'
 import { prorationRuleRoutes } from '../../../modules/proration-rules/src/proration-rules.routes'
+import { forecastRoutes } from '../../../modules/forecast/src/forecast.routes'
 import { NotificationsService } from '../../../modules/platform-notifications/src/notifications.service'
 import { registerNotificationListeners } from '../../../modules/platform-notifications/src/notifications.listeners'
 import { ParticipantsService } from '../../../modules/participants/src/participants.service'
@@ -146,6 +147,7 @@ export async function buildApp() {
   await app.register(nlRulesRoutes, { prefix: '/api/v1' })
   await app.register(exchangeRateRoutes, { prefix: '/api/v1' })
   await app.register(prorationRuleRoutes, { prefix: '/api/v1' })
+  await app.register(forecastRoutes, { prefix: '/api/v1' })
 
   // ── Plugin formula bridge ──
   for (const formula of pluginRegistry.getFormulas()) {

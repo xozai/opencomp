@@ -4,6 +4,7 @@ import { Route as IndexRoute } from './routes/index'
 import { Route as GoalSheetsRoute } from './routes/goal-sheets'
 import { Route as StatementsRoute } from './routes/statements'
 import { Route as DisputesRoute } from './routes/disputes'
+import { Route as ForecastRoute } from './routes/forecast'
 
 const routeTree = rootRoute.addChildren([
   LoginRoute,
@@ -11,6 +12,7 @@ const routeTree = rootRoute.addChildren([
   GoalSheetsRoute,
   StatementsRoute,
   DisputesRoute,
+  ForecastRoute,
 ])
 
 export { routeTree }

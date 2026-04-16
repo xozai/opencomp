@@ -285,6 +285,108 @@ export const creditsApi = {
     ),
 }
 
+// ─── Positions ────────────────────────────────────────────────────────────────
+
+export const positionsApi = {
+  list: (params?: Record<string, string>) => {
+    const qs = params ? '?' + new URLSearchParams(params).toString() : ''
+    return apiFetch<{ success: true; data: unknown[] }>(`/positions${qs}`)
+  },
+  create: (body: unknown) =>
+    apiFetch<{ success: true; data: unknown }>('/positions', { method: 'POST', body: JSON.stringify(body) }),
+  update: (id: string, body: unknown) =>
+    apiFetch<{ success: true; data: unknown }>(`/positions/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
+  hierarchy: (id: string) =>
+    apiFetch<{ success: true; data: unknown }>(`/positions/${id}/hierarchy`),
+  createRelationship: (body: unknown) =>
+    apiFetch<{ success: true; data: unknown }>('/position-relationships', { method: 'POST', body: JSON.stringify(body) }),
+  listRelationships: (params?: Record<string, string>) => {
+    const qs = params ? '?' + new URLSearchParams(params).toString() : ''
+    return apiFetch<{ success: true; data: unknown[] }>(`/position-relationships${qs}`)
+  },
+}
+
+// ─── Credit Rules ─────────────────────────────────────────────────────────────
+
+export const creditRulesApi = {
+  list: (params?: Record<string, string>) => {
+    const qs = params ? '?' + new URLSearchParams(params).toString() : ''
+    return apiFetch<{ success: true; data: unknown[] }>(`/credit-rules${qs}`)
+  },
+  create: (body: unknown) =>
+    apiFetch<{ success: true; data: unknown }>('/credit-rules', { method: 'POST', body: JSON.stringify(body) }),
+  update: (id: string, body: unknown) =>
+    apiFetch<{ success: true; data: unknown }>(`/credit-rules/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
+  preview: (body: unknown) =>
+    apiFetch<{ success: true; data: unknown }>('/credit-rules/preview', { method: 'POST', body: JSON.stringify(body) }),
+}
+
+// ─── NL Rules ─────────────────────────────────────────────────────────────────
+
+export const nlRulesApi = {
+  parse: (body: { text: string; ruleType: 'credit' | 'measure' | 'earnings'; planVersionId?: string }) =>
+    apiFetch<{ success: true; data: { parsedDefinition: unknown; confidence: number; warnings: string[]; requiresReview: boolean } }>(
+      '/nl-rules/parse', { method: 'POST', body: JSON.stringify(body) }
+    ),
+}
+
+// ─── Earnings Rules ───────────────────────────────────────────────────────────
+
+export const earningsRulesApi = {
+  list: (params?: Record<string, string>) => {
+    const qs = params ? '?' + new URLSearchParams(params).toString() : ''
+    return apiFetch<{ success: true; data: unknown[] }>(`/earnings-rules${qs}`)
+  },
+  create: (body: unknown) =>
+    apiFetch<{ success: true; data: unknown }>('/earnings-rules', { method: 'POST', body: JSON.stringify(body) }),
+  update: (id: string, body: unknown) =>
+    apiFetch<{ success: true; data: unknown }>(`/earnings-rules/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
+  results: (params?: Record<string, string>) => {
+    const qs = params ? '?' + new URLSearchParams(params).toString() : ''
+    return apiFetch<{ success: true; data: unknown[] }>(`/earnings-results${qs}`)
+  },
+}
+
+// ─── Measure Definitions ──────────────────────────────────────────────────────
+
+export const measureDefsApi = {
+  list: (params?: Record<string, string>) => {
+    const qs = params ? '?' + new URLSearchParams(params).toString() : ''
+    return apiFetch<{ success: true; data: unknown[] }>(`/measure-definitions${qs}`)
+  },
+  create: (body: unknown) =>
+    apiFetch<{ success: true; data: unknown }>('/measure-definitions', { method: 'POST', body: JSON.stringify(body) }),
+  update: (id: string, body: unknown) =>
+    apiFetch<{ success: true; data: unknown }>(`/measure-definitions/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
+  results: (params?: Record<string, string>) => {
+    const qs = params ? '?' + new URLSearchParams(params).toString() : ''
+    return apiFetch<{ success: true; data: unknown[] }>(`/measure-results${qs}`)
+  },
+}
+
+// ─── Payment Statements ───────────────────────────────────────────────────────
+
+export const paymentStatementsApi = {
+  list: (params?: Record<string, string>) => {
+    const qs = params ? '?' + new URLSearchParams(params).toString() : ''
+    return apiFetch<{ success: true; data: unknown[] }>(`/payments${qs}`)
+  },
+  getStatement: (participantId: string, periodId: string) =>
+    apiFetch<{ success: true; data: unknown }>(`/payments/statements?participantId=${participantId}&periodId=${periodId}`),
+  approve: (statementId: string) =>
+    apiFetch<{ success: true; data: unknown }>(`/payments/statements/${statementId}/approve`, { method: 'POST' }),
+  markPaid: (statementId: string) =>
+    apiFetch<{ success: true; data: unknown }>(`/payments/statements/${statementId}/mark-paid`, { method: 'POST' }),
+  calculate: (body: { periodId: string; planVersionId: string; calculationRunId: string }) =>
+    apiFetch<{ success: true; data: { statementsGenerated: number } }>(
+      '/payments/calculate', { method: 'POST', body: JSON.stringify(body) }
+    ),
+  calcExceptions: (params?: Record<string, string>) => {
+    const qs = params ? '?' + new URLSearchParams(params).toString() : ''
+    return apiFetch<{ success: true; data: unknown[] }>(`/payments/exceptions${qs}`)
+  },
+}
+
 // ─── Reporting ────────────────────────────────────────────────────────────────
 
 export const reportingApi = {

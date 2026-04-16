@@ -105,3 +105,28 @@ export const disputesApi = {
   open: (body: unknown) =>
     apiFetch<{ success: true; data: unknown }>('/disputes', { method: 'POST', body: JSON.stringify(body) }),
 }
+
+// ─── Forecast ─────────────────────────────────────────────────────────────────
+
+export type ForecastQuota = { id: string; type: string; amountCents: number; currency: string; notes: string | null }
+export type ForecastEarning = { componentId: string; grossEarningsCents: number; cappedEarningsCents: number; attainmentPct: number }
+export type ForecastMeasure = { componentId: string; measuredValue: number; transactionCount: number; currency: string }
+export type ForecastPayment = { componentId: string; earningsCents: number; paidCents: number; closingBalanceCents: number; status: string; paidAt: string | null }
+
+export type ForecastData = {
+  participant: { id: string; firstName: string; lastName: string }
+  period: { id: string; name: string; startDate: string; endDate: string; isClosed: boolean } | null
+  goalSheet: { id: string; data: unknown; acknowledgedAt: string | null } | null
+  quotas: ForecastQuota[]
+  earnings: ForecastEarning[]
+  measures: ForecastMeasure[]
+  payments: ForecastPayment[]
+  summary: { totalQuotaAmountCents: number; totalEarnedCents: number; totalPaidCents: number }
+}
+
+export const forecastApi = {
+  get: (periodId?: string) => {
+    const qs = periodId ? `?periodId=${periodId}` : ''
+    return apiFetch<{ success: true; data: ForecastData }>(`/my/forecast${qs}`)
+  },
+}

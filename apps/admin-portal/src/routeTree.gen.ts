@@ -14,6 +14,11 @@ import { Route as TransactionsIndexRoute } from './routes/transactions/index'
 import { Route as AdjustmentsIndexRoute } from './routes/adjustments/index'
 import { Route as ReportsIndexRoute } from './routes/reports/index'
 import { Route as GoalSheetsIndexRoute } from './routes/goal-sheets/index'
+import { Route as PositionsIndexRoute } from './routes/positions/index'
+import { Route as CreditRulesIndexRoute } from './routes/credit-rules/index'
+import { Route as EarningsRulesIndexRoute } from './routes/earnings-rules/index'
+import { Route as PaymentStatementsIndexRoute } from './routes/payment-statements/index'
+import { Route as MeasureDefinitionsIndexRoute } from './routes/measure-definitions/index'
 
 const routeTree = rootRoute.addChildren([
   LoginRoute,
@@ -30,6 +35,11 @@ const routeTree = rootRoute.addChildren([
   TransactionsIndexRoute,
   DisputesIndexRoute,
   ApprovalsIndexRoute,
+  PositionsIndexRoute,
+  CreditRulesIndexRoute,
+  EarningsRulesIndexRoute,
+  PaymentStatementsIndexRoute,
+  MeasureDefinitionsIndexRoute,
 ])
 
 export { routeTree }

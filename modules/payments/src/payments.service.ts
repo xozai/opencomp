@@ -1,10 +1,11 @@
-import { eq, and, isNull } from 'drizzle-orm'
+import { eq, and, isNull, lt } from 'drizzle-orm'
 import type { Db } from '../../../apps/api/src/db/client'
 import {
   earningsResults,
   paymentBalances,
   paymentStatements,
   calcExceptions,
+  periods,
 } from '../../../apps/api/src/db/schema'
 import { AuditService } from '../../platform-audit/src/audit.service'
 import type { AuditContext } from '../../platform-audit/src/audit.service'
@@ -43,6 +44,13 @@ export class PaymentsService {
       byParticipant.get(er.participantId)!.push(er)
     }
 
+    // Load current period so we can find the prior one by date
+    const [currentPeriod] = await this.db
+      .select({ id: periods.id, startDate: periods.startDate })
+      .from(periods)
+      .where(and(eq(periods.tenantId, tenantId), eq(periods.id, periodId)))
+      .limit(1)
+
     let statementsGenerated = 0
 
     // 3. For each participant
@@ -53,9 +61,27 @@ export class PaymentsService {
       const lineItems: unknown[] = []
 
       for (const er of earningsForParticipant) {
-        // Find prior period's payment_balance (closing balance becomes opening balance)
-        // In practice we'd look up the prior period; for now opening balance = 0
-        const openingBalanceCents = 0
+        // Look up prior period's closing balance for this participant + component.
+        // A "prior period" is any period whose end_date < this period's start_date.
+        // We pick the most recent one by sorting DESC and taking the first.
+        let openingBalanceCents = 0
+        if (currentPeriod) {
+          const [priorBalance] = await this.db
+            .select({ closingBalanceCents: paymentBalances.closingBalanceCents })
+            .from(paymentBalances)
+            .innerJoin(periods, eq(periods.id, paymentBalances.periodId))
+            .where(
+              and(
+                eq(paymentBalances.tenantId, tenantId),
+                eq(paymentBalances.participantId, participantId),
+                eq(paymentBalances.componentId, er.componentId),
+                lt(periods.endDate, currentPeriod.startDate),
+              ),
+            )
+            .orderBy(periods.endDate)
+            .limit(1)
+          if (priorBalance) openingBalanceCents = priorBalance.closingBalanceCents
+        }
         const earningsCents = er.cappedEarningsCents
         const closingBalanceCents = openingBalanceCents + earningsCents
 

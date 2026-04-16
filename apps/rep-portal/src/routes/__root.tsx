@@ -2,14 +2,15 @@ import { createRootRouteWithContext, Link, Outlet } from '@tanstack/react-router
 import type { QueryClient } from '@tanstack/react-query'
 import { getAccessToken, clearTokens } from '../lib/api'
 
-interface RouterContext { queryClient: QueryClient }
+export interface RouterContext { queryClient: QueryClient }
 
 export const Route = createRootRouteWithContext<RouterContext>()({
   component: RootLayout,
 })
 
 const NAV = [
-  { to: '/', label: 'My Goal Sheets' },
+  { to: '/forecast', label: '📊 Forecast' },
+  { to: '/', label: 'Goal Sheets' },
   { to: '/statements', label: 'Statements' },
   { to: '/disputes', label: 'Disputes' },
 ]
